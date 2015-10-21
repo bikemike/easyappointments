@@ -13,6 +13,21 @@ class cli extends CI_Controller
 		// Set user's selected language.
 		$this->lang->load('translations', $this->config->item('language')); // default
 	}
+	/**
+	 * Sends test email.
+	 */
+	public function send_test_email($to_address = NULL)
+	{
+		if ( $this->input->is_cli_request())
+		{
+            try {
+                $this->load->library('Notifications');
+                $this->notifications->send_test($to_address);
+            } catch(Exception $exc) {
+                $view['exceptions'][] = $exc;
+            }
+        }
+    }
 
 	/**
 	 * Sends email notificaitons to client who have appointments in the next 24
