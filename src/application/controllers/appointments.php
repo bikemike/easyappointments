@@ -113,6 +113,13 @@ class Appointments extends CI_Controller {
                     $appointment   = array();
                     $provider      = array();
                     $customer      = array();
+					$service       = $this->input->get("service");
+					$provider      = $this->input->get("provider");
+					if (is_numeric($service) && is_numeric($provider))
+					{
+						$appointment['id_services'] = $service;
+						$appointment['id_users_provider'] = $provider;
+					}
                 }
 
                 // Load the book appointment view.
