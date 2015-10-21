@@ -107,7 +107,8 @@ var FrontendBook = {
         
         // If the manage mode is true, the appointments data should be
         // loaded by default.
-        if (FrontendBook.manageMode) {
+        if (FrontendBook.manageMode || !$.isEmptyObject(GlobalVariables.appointmentData))
+		{
             FrontendBook.applyAppointmentData(GlobalVariables.appointmentData,
                     GlobalVariables.providerData, GlobalVariables.customerData);
         } else {
@@ -561,11 +562,15 @@ var FrontendBook = {
             'zip_code': $('#zip-code').val()
         };
 
-        var startDatetime = Date.parse($('#select-date').datepicker('getDate').toString('yyyy-MM-dd') 
-            + ' ' + $('.selected-hour').text());
+		var startDatetime = "";
+        if (selectedDate !== null) {
+			startDatetime = Date.parse($('#select-date').datepicker('getDate').toString('yyyy-MM-dd') 
+				+ ' ' + $('.selected-hour').text());
+			startDatetime = GeneralFunctions.getStorageDateTime(startDatetime);
+		}
         
         postData['appointment'] = {
-            'start_datetime': GeneralFunctions.getStorageDateTime(startDatetime),
+            'start_datetime': startDatetime,
             'end_datetime': FrontendBook.calcEndDatetime(),
             'notes': $('#notes').val(),
             'type': 0,
@@ -601,9 +606,13 @@ var FrontendBook = {
         });
         
         // Add the duration to the start datetime.
-        var startDatetime = $('#select-date').datepicker('getDate').toString('yyyy-MM-dd') 
-                + ' ' + $('.selected-hour').text();
-        startDatetime = Date.parse(startDatetime);
+        var selectedDate = $('#select-date').datepicker('getDate');
+		var startDatetime = null;
+        if (selectedDate !== null) {
+			var startDatetime = selectedDate.toString('yyyy-MM-dd') 
+					+ ' ' + $('.selected-hour').text();
+			startDatetime = Date.parse(startDatetime);
+		}
         var endDatetime = undefined;
         
         if (selServiceDuration !== undefined && startDatetime !== null) {
