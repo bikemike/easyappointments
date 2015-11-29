@@ -354,7 +354,6 @@
                     </button>
                     <form id="book-appointment-form" style="display:inline-block" method="post">
                         <button id="book-appointment-submit" type="button" class="btn btn-success">
-                            <i class="icon-ok icon-white"></i>
                             <?php
                                 echo (!$manage_mode) ? $this->lang->line('confirm')
                                         : $this->lang->line('update');
