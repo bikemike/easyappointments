@@ -146,6 +146,7 @@ var FrontendBook = {
          */
         $('#select-service').change(function() {
             var currServiceId = $('#select-service').val();
+            var currProviderId = $('#select-provider').val();
             $('#select-provider').empty();
 
             $.each(GlobalVariables.availableProviders, function(indexProvider, provider) {
@@ -153,7 +154,12 @@ var FrontendBook = {
                     // If the current provider is able to provide the selected service,
                     // add him to the listbox. 
                     if (serviceId == currServiceId) { 
-                        var optionHtml = '<option value="' + provider['id'] + '">' 
+                        var selected = "";
+                        if (provider['id'] == currProviderId)
+                        {
+                            selected = "selected";
+                        }
+                        var optionHtml = '<option value="' + provider['id'] + '" ' + selected + '>' 
                                 + provider['first_name']  + ' ' + provider['last_name'] 
                                 + '</option>';
                         $('#select-provider').append(optionHtml);
@@ -640,9 +646,12 @@ var FrontendBook = {
             $('#select-provider').val(appointment['id_users_provider']);
             
             // Set Appointment Date
-            $('#select-date').datepicker('setDate', 
-                    Date.parseExact(appointment['start_datetime'], 'yyyy-MM-dd HH:mm:ss'));
-            FrontendBook.getAvailableHours($('#select-date').val());
+            if ('start_datetime' in appointment)
+            {
+                $('#select-date').datepicker('setDate', 
+                        Date.parseExact(appointment['start_datetime'], 'yyyy-MM-dd HH:mm:ss'));
+                FrontendBook.getAvailableHours($('#select-date').val());
+            }
             
             // Apply Customer's Data
             $('#last-name').val(customer['last_name']);
