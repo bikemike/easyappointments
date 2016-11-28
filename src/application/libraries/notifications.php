@@ -115,6 +115,7 @@ class Notifications {
         
         // :: INSTANTIATE EMAIL OBJECT AND SEND EMAIL
         $mail = new PHPMailer();
+        $this->configure_mailer($mail);
         $mail->From = $company_settings['company_email'];
         $mail->FromName = $company_settings['company_name'];
         $mail->AddAddress($receiver_address); // "Name" argument crushes the phpmailer class.
@@ -207,6 +208,7 @@ class Notifications {
         
         // :: SETUP EMAIL OBJECT AND SEND NOTIFICATION
         $mail = new PHPMailer();
+        $this->configure_mailer($mail);
         $mail->From         = $company_settings['company_email'];
         $mail->FromName     = $company_settings['company_name'];
         $mail->AddAddress($to_address); // "Name" argument crushes the phpmailer class.
@@ -245,6 +247,7 @@ class Notifications {
         
         // :: SETUP EMAIL OBJECT AND SEND NOTIFICATION
         $mail = new PHPMailer();
+        $this->configure_mailer($mail);
         $mail->From = $company_settings['company_email'];
         $mail->FromName = $company_settings['company_name'];
         $mail->AddAddress($email); // "Name" argument crushes the phpmailer class.
@@ -271,6 +274,7 @@ class Notifications {
      */
     public function send_new_installation($company_name, $company_email, $company_link) {
         $mail = new PHPMailer();
+        $this->configure_mailer($mail);
         $mail->From = $company_email;
         $mail->FromName = 'New Installation: ' . $company_name ;
         $mail->AddAddress('info@easyappointments.org');
@@ -283,6 +287,50 @@ class Notifications {
                 . 'Company Email: ' . $company_email . '<br>'
                 . 'Company Link: ' . $company_link . '<br>';
         return $mail->Send();
+    }
+
+
+    /**
+     * This method sends a test email.
+     * 
+     */
+    public function send_test($to_address) {
+        // :: SETUP EMAIL OBJECT AND SEND NOTIFICATION
+        $mail = new PHPMailer();
+        $this->configure_mailer($mail);
+        $mail->From = SystemConfiguration::$email_username;
+        if (isset($to_address))
+            $mail->AddAddress($to_address);
+        else
+            $mail->AddAddress(SystemConfiguration::$email_username);
+        $mail->SMTPDebug = 2;
+        $mail->IsHTML(false);
+        $mail->CharSet = 'UTF-8';
+        $mail->Subject = "Test Email";
+        $mail->Body = "This is a test of the email system.";
+        if (!$mail->Send()) {
+            throw new Exception('Email could not been sent. ' 
+                    . 'Mailer Error (Line ' . __LINE__ . '): ' . $mail->ErrorInfo);
+        }
+        
+        return TRUE;
+    }
+
+    private function configure_mailer($mail) {
+        if (isset(SystemConfiguration::$email_server))
+        {
+            $mail->IsSMTP();
+            $mail->SMTPAuth = true;
+            $mail->SMTPKeepAlive = true;
+            if (isset(SystemConfiguration::$email_secure))
+                $mail->SMTPSecure = SystemConfiguration::$email_secure;
+
+            $mail->Host = SystemConfiguration::$email_server;
+            if (isset(SystemConfiguration::$email_port))
+                $mail->Port = SystemConfiguration::$email_port;
+            $mail->Username = SystemConfiguration::$email_username;
+            $mail->Password = SystemConfiguration::$email_password;
+        }
     }
 }
 
