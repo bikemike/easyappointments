@@ -371,7 +371,7 @@ class Backend_api extends CI_Controller {
             $this->load->model('providers_model');
 	    	$this->load->model('customers_model');
             
-	    	$key = mysql_real_escape_string($_POST['key']); 
+	    	$key = $this->db->escape_str($_POST['key']); 
             
 	    	$where_clause = 
 	    			'(first_name LIKE "%' . $key . '%" OR ' . 
@@ -638,7 +638,7 @@ class Backend_api extends CI_Controller {
             }
             
             $this->load->model('services_model');
-            $key = mysql_real_escape_string($_POST['key']);  
+            $key = $this->db->escape_str($_POST['key']);  
             $where = 
                     '(name LIKE "%' . $key . '%" OR duration LIKE "%' . $key . '%" OR ' . 
                     'price LIKE "%' . $key . '%" OR currency LIKE "%' . $key . '%" OR ' .
@@ -716,7 +716,7 @@ class Backend_api extends CI_Controller {
             }
             
             $this->load->model('services_model');
-            $key = mysql_real_escape_string($_POST['key']);  
+            $key = $this->db->escape_str($_POST['key']);  
             $where = '(name LIKE "%' . $key . '%" OR description LIKE "%' . $key . '%")';
             $categories = $this->services_model->get_all_categories($where);
             echo json_encode($categories);
@@ -740,7 +740,7 @@ class Backend_api extends CI_Controller {
             }
             
             $this->load->model('admins_model');
-            $key = mysql_real_escape_string($_POST['key']); 
+            $key = $this->db->escape_str($_POST['key']); 
             $where = 
                 '(first_name LIKE "%' . $key . '%" OR last_name LIKE "%' . $key . '%" ' . 
                 'OR email LIKE "%' . $key . '%" OR mobile_number LIKE "%' . $key . '%" ' . 
@@ -826,7 +826,7 @@ class Backend_api extends CI_Controller {
             }
             
             $this->load->model('providers_model');
-            $key = mysql_real_escape_string($_POST['key']); 
+            $key = $this->db->escape_str($_POST['key']); 
             $where = 
                 '(first_name LIKE "%' . $key . '%" OR last_name LIKE "%' . $key . '%" ' . 
                 'OR email LIKE "%' . $key . '%" OR mobile_number LIKE "%' . $key . '%" ' . 
@@ -917,7 +917,7 @@ class Backend_api extends CI_Controller {
             }
             
             $this->load->model('secretaries_model');
-            $key = mysql_real_escape_string($_POST['key']); 
+            $key = $this->db->escape_str($_POST['key']); 
             $where = 
                 '(first_name LIKE "%' . $key . '%" OR last_name LIKE "%' . $key . '%" ' . 
                 'OR email LIKE "%' . $key . '%" OR mobile_number LIKE "%' . $key . '%" ' . 
