@@ -13,7 +13,26 @@
 
         <div id="content" style="padding: 10px 15px;">
             <h2>$email_title</h2>
-            <p>$email_message</p>    
+            <p>
+Hi $customer_name,
+</p>
+<p>
+Thank you for arranging a $appointment_service with $appointment_provider on $appointment_long_date at $appointment_time. Below you can see the appointment details. Make changes by clicking the appointment link.
+</p>    
+<p>
+Please note: If your appointment time is after 6pm, the main doors into the Atrium will be locked. Please enter the building through Habit Coffee on the corner of Yates and Blanshard and wait by the elevators on the ground floor. Your therapist will come down to bring you up (security is very tight after 6pm).
+</p>
+
+<p>
+If you have any issues finding us, please call or text your therapist. 
+</p>
+<p>
+Wellness At The Atrium<br/>
+1321 Blanshard Street, Suite 301 on the 3rd floor. </p>
+<p>
+Alix Morrison, RMT: (250) 857-8969<br/>
+Tara Tait, RMT: (250) 882-7713
+</p>    
             
             <h2>Appointment Details</h2>
             <table id="appointment-details">
