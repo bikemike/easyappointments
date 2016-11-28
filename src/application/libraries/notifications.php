@@ -83,6 +83,8 @@ class Notifications {
             '$appointment_provider'     => $provider_data['first_name'] . ' ' . $provider_data['last_name'],
             '$appointment_start_date'   => date($date_format . ' ' . $time_format, strtotime($appointment_data['start_datetime'])),
             '$appointment_end_date'     => date($date_format . ' ' . $time_format, strtotime($appointment_data['end_datetime'])),
+            '$appointment_long_date'=> date("l, F jS, Y", strtotime($appointment_data['start_datetime'])),
+            '$appointment_time'=> date($time_format, strtotime($appointment_data['start_datetime'])),
             '$appointment_link'         => $appointment_link, 
             
             '$company_link'             => $company_settings['company_link'],
