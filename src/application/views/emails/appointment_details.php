@@ -20,7 +20,7 @@ Hi $customer_name,
 Thank you for arranging a $appointment_service with $appointment_provider on $appointment_long_date at $appointment_time. Below you can see the appointment details. Make changes by clicking the appointment link.
 </p>    
 <p>
-Please note: If your appointment time is after 6pm, the main doors into the Atrium will be locked. Please enter the building through Habit Coffee on the corner of Yates and Blanshard and wait by the elevators on the ground floor. Your therapist will come down to bring you up (security is very tight after 6pm).
+Please note: If your appointment time is after 6pm or on a Saturday, the main doors into the Atrium will be locked. Please enter the building through Habit Coffee on the corner of Yates and Blanshard and wait by the elevators on the ground floor. Your therapist will come down to bring you up.
 </p>
 
 <p>
