@@ -679,63 +679,69 @@ class Appointments extends CI_Controller {
             );
         } 
 
-        
-        $start = new DateTime($selected_date_working_plan['start']);
-        $end = new DateTime($selected_date_working_plan['end']);
-        $start->setDate($start_year, $start_month, $start_day);
-        $end->setDate($start_year, $start_month, $start_day);
-        $available_periods[] = array(
-            'start' => $start,
-            'end' => $end
-        );
+        $available_periods = array();
+        if (isset( $selected_date_working_plan['start']) && isset( $selected_date_working_plan['start']))
+        {
+            $start = new DateTime($selected_date_working_plan['start']);
+            $end = new DateTime($selected_date_working_plan['end']);
+            $start->setDate($start_year, $start_month, $start_day);
+            $end->setDate($start_year, $start_month, $start_day);
+            $available_periods[] = array(
+                'start' => $start,
+                'end' => $end
+            );
+        }
 
         // Split the working plan to available time periods that do not
         // contain the breaks/unavailable periods in them.
-        foreach($breaks_and_unavailable_periods as $break) {
-            $break_start = $break['start'];
-            $break_end   = $break['end'];
-            if ($break_start < $start)
-                $break_start = $start;
-            if ($break_end > $end)
-                $break_end = $end;
+        if (sizeof($available_periods)  > 0)
+        {
+            foreach($breaks_and_unavailable_periods as $break) {
+                $break_start = $break['start'];
+                $break_end   = $break['end'];
+                if ($break_start < $start)
+                    $break_start = $start;
+                if ($break_end > $end)
+                    $break_end = $end;
 
-            if ($break_start >= $break_end)
-                continue;
+                if ($break_start >= $break_end)
+                    continue;
 
-            foreach ($available_periods as $key => $open_period)
-            {
-                $s = $open_period['start'];
-                $e = $open_period['end'];
-                if ($s < $break_end && $break_start < $e) // check for overlap
+                foreach ($available_periods as $key => $open_period)
                 {
-                    $changed = FALSE;
-                    if ($s < $break_start)
+                    $s = $open_period['start'];
+                    $e = $open_period['end'];
+                    if ($s < $break_end && $break_start < $e) // check for overlap
                     {
-                        $open_start = $s;
-                        $open_end = $break_start;
-                        $available_periods[] = array(
-                            'start' => $open_start,
-                            'end' => $open_end
-                        );
-                        $changed = TRUE;
-                    }
-                    if ($break_end < $e)
-                    {
-                        $open_start = $break_end;
-                        $open_end = $e;
-                        $available_periods[] = array(
-                            'start' => $open_start,
-                            'end' => $open_end
-                        );
-                        $changed = TRUE;
-                    }
-                    if ($break_start <= $s && $e <= $break_end)
-                    {
-                        $changed = TRUE;
-                    }
-                    if ($changed)
-                    {
-                        unset($available_periods[$key]);
+                        $changed = FALSE;
+                        if ($s < $break_start)
+                        {
+                            $open_start = $s;
+                            $open_end = $break_start;
+                            $available_periods[] = array(
+                                'start' => $open_start,
+                                'end' => $open_end
+                            );
+                            $changed = TRUE;
+                        }
+                        if ($break_end < $e)
+                        {
+                            $open_start = $break_end;
+                            $open_end = $e;
+                            $available_periods[] = array(
+                                'start' => $open_start,
+                                'end' => $open_end
+                            );
+                            $changed = TRUE;
+                        }
+                        if ($break_start <= $s && $e <= $break_end)
+                        {
+                            $changed = TRUE;
+                        }
+                        if ($changed)
+                        {
+                            unset($available_periods[$key]);
+                        }
                     }
                 }
             }
