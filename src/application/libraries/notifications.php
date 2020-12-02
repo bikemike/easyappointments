@@ -86,6 +86,7 @@ class Notifications {
             '$appointment_long_date'=> date("l, F jS, Y", strtotime($appointment_data['start_datetime'])),
             '$appointment_time'=> date($time_format, strtotime($appointment_data['start_datetime'])),
             '$appointment_link'         => $appointment_link, 
+            '$appointment_notes'         => $appointment_data['notes'], 
             
             '$company_link'             => $company_settings['company_link'],
             '$company_name'             => $company_settings['company_name'],

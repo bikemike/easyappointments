@@ -1152,10 +1152,10 @@ var BackendCalendar = {
                                 
                                 // Add custom unavailable periods.
                                 $.each(response.appointments, function(index, appointment) {
-                                    if (appointment['type'] != 0) {
+                                    if (appointment['type'] == 1 || appointment['type'] == 2) {
                                         var title = (appointment['type'] == 1) ? EALang['unavailable'] : EALang['one_off_availability'];
                                         var specialPeriod = {
-                                            'title': title + ' <br><small>' + ((appointments.notes.length > 30) 
+                                            'title': title + ' <br><small>' + ((appointment.notes.length > 30) 
                                                             ? appointment.notes.substring(0, 30) + '...'
                                                             : appointment.notes) + '</small>',
                                             'start': Date.parse(appointment.start_datetime),
@@ -1251,7 +1251,7 @@ var BackendCalendar = {
                                 $.each(response.appointments, function(index, appointment) {
                                    //if (currDateStart.toString('dd/MM/yyyy') 
                                    //        === Date.parse(appointment.start_datetime).toString('dd/MM/yyyy')) {
-                                    if (appointment['type'] != 0) {
+                                    if (appointment['type'] == 1 || appointment['type'] == 2) {
                                         var title = (appointment['type'] == 1) ? EALang['unavailable'] : EALang['one_off_availability'];
                                         specialPeriod = {
                                             'title': title + ' <br><small>' + ((appointment.notes.length > 30) 
@@ -1660,6 +1660,12 @@ var BackendCalendar = {
                     ? '' : 'hide'; 
             displayDelete = (GlobalVariables.user.privileges.appointments.delete == true) 
                     ? '' : 'hide'; 
+
+            var notes = '';
+            if (event.data['notes'])
+            {
+                notes = '<br>' + '<strong>' + EALang['notes'] +'</strong> ' + event.data['notes'];
+            }
             
             html = 
                     '<style type="text/css">' 
@@ -1682,6 +1688,7 @@ var BackendCalendar = {
                     '<strong>' + EALang['customer'] + '</strong> ' 
                         + event.data['customer']['first_name'] + ' ' 
                         + event.data['customer']['last_name'] 
+                        + notes 
                         + '<hr>' +
                     '<center>' + 
                         '<button class="edit-popover btn btn-primary ' + displayEdit + '">' + EALang['edit'] + '</button>' +

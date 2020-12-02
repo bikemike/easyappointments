@@ -49,7 +49,7 @@ class Appointments extends CI_Controller {
 
                     $results = $this->appointments_model->get_batch(array('hash' => $appointment_hash));
                     
-                    if (count($results) === 0) {
+                    if (count($results) === 0 || $results[0]['type'] != 0) {
                         // The requested appointment doesn't exist in the database. Display
                         // a message to the customer.
                         $view = array(
@@ -304,7 +304,7 @@ class Appointments extends CI_Controller {
             );
             
             // :: DELETE APPOINTMENT RECORD FROM THE DATABASE.
-            if (!$this->appointments_model->delete($appointment['id'])) {
+            if (!$this->appointments_model->delete($appointment['id'],false,$_POST['cancel_reason'])) {
                 throw new Exception('Appointment could not be deleted from the database.');
             }
             
@@ -624,6 +624,8 @@ class Appointments extends CI_Controller {
         $where_clause_unavailable['type'] = 1; // type 1 = unavailable period
         $where_clause_one_off_available = $where_clause;
         $where_clause_one_off_available['type'] = 2; // type 2 = one-off availability
+        // type 3 = user deleted
+        // type 4 = admin deleted
         
         // (in case they span multiple days)
         $appointments = $this->appointments_model->get_batch($where_clause_appointment);

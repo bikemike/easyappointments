@@ -98,6 +98,26 @@
     <div id="main" class="container">
         
         <div id="book-appointment-wizard">
+            <?php
+                // ------------------------------------------------------
+                // CANCEL APPOINTMENT BUTTON
+                // ------------------------------------------------------
+                if ($manage_mode === TRUE) {
+                    echo '
+                        <div id="cancel-appointment-frame">
+                            <p class="pull-left">' . 
+                                $this->lang->line('cancel_appointment_hint') .
+                            '</p>
+                            <form id="cancel-appointment-form" method="post" class="pull-right"  
+                                    action="' . $this->config->item('base_url') 
+                                    . 'appointments/cancel/' . $appointment_data['hash'] . '">
+                                <textarea name="cancel_reason" style="display:none"></textarea>
+                                <button id="cancel-appointment" class="btn btn-inverse">' .
+                                        $this->lang->line('cancel') . '</button>
+                            </form>
+                        </div>';
+                }   
+            ?>
             
             <?php 
                 // ------------------------------------------------------
@@ -123,26 +143,6 @@
                 </div>
             </div>
             
-            <?php
-                // ------------------------------------------------------
-                // CANCEL APPOINTMENT BUTTON
-                // ------------------------------------------------------
-                if ($manage_mode === TRUE) {
-                    echo '
-                        <div id="cancel-appointment-frame">
-                            <p class="pull-left">' . 
-                                $this->lang->line('cancel_appointment_hint') .
-                            '</p>
-                            <form id="cancel-appointment-form" method="post" class="pull-right"  
-                                    action="' . $this->config->item('base_url') 
-                                    . 'appointments/cancel/' . $appointment_data['hash'] . '">
-                                <textarea name="cancel_reason" style="display:none"></textarea>
-                                <button id="cancel-appointment" class="btn btn-inverse">' .
-                                        $this->lang->line('cancel') . '</button>
-                            </form>
-                        </div>';
-                }   
-            ?>
             
             <?php 
                 // ------------------------------------------------------
@@ -344,6 +344,7 @@
                     <div class="frame-content" style="width:600px">
                         <div id="appointment-details" class="span3"></div>
                         <div id="customer-details" class="span3"></div>
+                        <div class="span6"><p><b>Cancellation Policy</b></p><p>We require at least 24 HOURS NOTICE for appointment cancellations so that we can fill the space. Should an appointment be missed without notice, the full appointment fee will apply.</p></div>
                     </div>
                 </div>
                 

@@ -55,6 +55,8 @@ class Backend_api extends CI_Controller {
                 $where_id => $_POST['record_id'],
                 'start_datetime <=' => $_POST['end_date'],
                 'end_datetime >=' => $_POST['start_date'],
+                'type !=' => 3, // admin deleted type
+                'type !=' => 4, // user deleted type
             );
             
             $response['appointments'] = $this->appointments_model->get_batch($where_clause);
@@ -265,7 +267,7 @@ class Backend_api extends CI_Controller {
             );
             
             // :: DELETE APPOINTMENT RECORD FROM DATABASE
-            $this->appointments_model->delete($_POST['appointment_id']);
+            $this->appointments_model->delete($_POST['appointment_id'], true, $_POST['delete_reason']);
             
             // :: SYNC DELETE WITH GOOGLE CALENDAR
             if ($appointment['id_google_calendar'] != NULL) {

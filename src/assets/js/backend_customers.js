@@ -459,7 +459,7 @@ CustomersHelper.prototype.displayAppointment = function(appointment) {
             '<div>' + 
                 '<strong>' + appointment.service.name + '</strong><br>' + 
                 appointment.provider.first_name + ' ' + appointment.provider.last_name + '<br>' +
-                start + ' - ' + end + '<br>' +
+                start + ' - ' + end + '<br>' + appointment.notes  +
             '</div>';
 
     $('#appointment-details').html(html);

@@ -211,19 +211,34 @@ class Appointments_Model extends CI_Model {
      * @param numeric $appointment_id The record id to be deleted.
      * @return bool Returns the delete operation result.
      */
-    public function delete($appointment_id) {
+    public function delete($appointment_id, $admin_delete=true,$notes="") {
         if (!is_numeric($appointment_id)) { 
             throw new Exception('Invalid argument type $appointment_id (value:"' . $appointment_id . '")');
         }
         
-        $num_rows = $this->db->get_where('ea_appointments', array('id' => $appointment_id))->num_rows();
+        #$num_rows = $this->db->get_where('ea_appointments', array('id' => $appointment_id))->num_rows();
+        $appointment = $this->get_row($appointment_id);
         
-        if ($num_rows == 0) {
+        if (!isset($appointment)) {
             return FALSE; // Record does not exist.
         }
-        
-        $this->db->where('id', $appointment_id);
-        return $this->db->delete('ea_appointments');
+        if ($appointment['type'] == 0)
+        {
+            if ($admin_delete)
+                $appointment['type'] = 3;
+            else
+                $appointment['type'] = 4;
+
+            $appointment['notes'] .= "\n" . "DELETION NOTE: " . $notes;
+            
+            $this->add($appointment);
+            return true;
+        }
+        else
+        {       
+            $this->db->where('id', $appointment_id);
+            return $this->db->delete('ea_appointments');
+        }
     }
     
     /**
