@@ -30,25 +30,34 @@ class cli extends CI_Controller
     }
 
 	/**
-	 * Sends email notificaitons to client who have appointments in the next 24
-	 * hours. If the client books within 36 hours of their appointment
-	 *
+	 * Sends email notificaitons to client at 8am two days before their appointment.
+     * If the client books within 36 hours of their appointment they will
+     * not get a reminder email.
+     *
 	 * This method is meant to be run from the command line through a cron job
 	 * or scheduler at frequent intervals. It checks to see if there are any
 	 * clients with upcoming appointments in the database and notifies them.
 	 * Once the client has been notified the appointment is marked as
 	 * 'notified' so that the client isnt' notified again.
+     *
+     * This method limits to 1 email per execution so the cron job must be run
+     * somewhat frequently.
 	 */
 	public function send_appointment_reminders($simulate = FALSE, $show_email_message = FALSE)
 	{
 		// TODO: make sure notified column exists. if not, add it
+        // appointment is within 24 hours: `start_datetime` < date_add(now(), INTERVAL 24 HOUR)
+        // 8am the day before their appointment: DATE_SUB(DATE(`start_datetime`),INTERVAL 16 HOUR) < now()
 		if ( $this->input->is_cli_request())
 		{
 			$this->load->model('appointments_model');
 			$query = $this->db
 				->select('*')
 				->from('ea_appointments')
-				->where('`id_services` IS NOT NULL AND `notified` = FALSE  AND `start_datetime` > now() AND `start_datetime` < date_add(now(), INTERVAL 24 HOUR) AND `book_datetime` < date_sub(`start_datetime`, INTERVAL 36 HOUR)')
+				//->where('`id_services` IS NOT NULL AND `notified` = FALSE  AND `start_datetime` > now() AND `start_datetime` < date_add(now(), INTERVAL 24 HOUR) AND `book_datetime` < date_sub(`start_datetime`, INTERVAL 36 HOUR)')
+                // 8am two days previous should be date - 40 hours, but this server is 3 hours ahead of pacific
+                // so 11am is 8am pacific time (-37 hours)
+				->where('`type` = 0 AND `id_services` IS NOT NULL AND `notified` = FALSE  AND `start_datetime` > now() AND DATE_SUB(DATE(`start_datetime`),INTERVAL 37 HOUR) < now() AND `book_datetime` < date_sub(`start_datetime`, INTERVAL 36 HOUR) LIMIT 1')
 				->get();
 
 			$sql = $this->db->last_query();
@@ -141,7 +150,7 @@ class cli extends CI_Controller
 				$this->db->where('id', $appointment_data['id'])->update('ea_appointments', array( 'notified' => 1) );
 			}
 
-			echo "Sending reminder email to " . $email_address;
+			echo "Sending reminder email to " . $email_address . " for appointment " . $appointment_data['id'] . " on " . $appointment_data['start_datetime'];
 			echo "\n";
 
 			if (!$simulate || $debug)

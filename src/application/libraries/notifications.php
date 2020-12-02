@@ -110,8 +110,10 @@ class Notifications {
             'Appointment Link' => $this->ci->lang->line('appointment_link_title')
         );
         
-        $email_html = file_get_contents(dirname(dirname(__FILE__)) 
-                . '/views/emails/appointment_details.php');
+        //if (strpos($provider_data['email'], "hotmail") !== false)
+        $email_html = file_get_contents(dirname(dirname(__FILE__)) . '/views/emails/appointment_details_home.php');
+        //else
+        //   $email_html = file_get_contents(dirname(dirname(__FILE__)) . '/views/emails/appointment_details.php');
         $email_html = $this->replace_template_variables($replace_array, $email_html);
         
         // :: INSTANTIATE EMAIL OBJECT AND SEND EMAIL
