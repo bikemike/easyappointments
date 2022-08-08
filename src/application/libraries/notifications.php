@@ -1,6 +1,9 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');  
 
 require_once dirname(__FILE__) . '/external/class.phpmailer.php';
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+
 
 /**
  * This library handles all the notification email deliveries 
