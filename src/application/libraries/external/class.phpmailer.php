@@ -21,6 +21,8 @@
 
 namespace PHPMailer\PHPMailer;
 
+require_once 'class.exception.php';
+
 /**
  * PHPMailer - PHP email creation and transport class.
  *
@@ -1991,7 +1993,7 @@ class PHPMailer
      */
     protected function smtpSend($header, $body)
     {
-        require_once $this->PluginDir . 'class.smtp.php';
+        require_once 'class.smtp.php';
         $header = static::stripTrailingWSP($header) . static::$LE . static::$LE;
         $bad_rcpt = [];
         if (!$this->smtpConnect($this->SMTPOptions)) {

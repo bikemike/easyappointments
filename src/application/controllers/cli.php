@@ -20,6 +20,8 @@ class cli extends CI_Controller
 	{
 		if ( $this->input->is_cli_request())
 		{
+            if (NULL === $to_address)
+                $to_address = "bikemike@gmail.com";
             try {
                 $this->load->library('Notifications');
                 $this->notifications->send_test($to_address);

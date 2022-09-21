@@ -124,7 +124,14 @@ class Notifications {
         $this->configure_mailer($mail);
         $mail->From = $company_settings['company_email'];
         $mail->FromName = $company_settings['company_name'];
-        $mail->AddAddress($receiver_address); // "Name" argument crushes the phpmailer class.
+        if ($debug)
+        {
+            $mail->AddAddress($company_settings['company_email']);
+        }
+        else
+        {
+            $mail->AddAddress($receiver_address); // "Name" argument crushes the phpmailer class.
+        }
         $mail->IsHTML(true);
         $mail->CharSet = 'UTF-8';
         $mail->Subject = $title;
@@ -135,6 +142,10 @@ class Notifications {
 			echo "To: $receiver_address\n";
 			echo "Subject: $title\n";
 			echo "Body:\n$email_html\n\n";
+			if (!$mail->Send()) {
+				throw new Exception('Email could not been sent. Mailer Error (Line ' 
+						. __LINE__ . '): ' . $mail->ErrorInfo);
+			}
 		}
 		else
 		{
