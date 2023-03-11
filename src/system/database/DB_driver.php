@@ -60,6 +60,7 @@ class CI_DB_driver {
 	var $cachedir		= '';
 	var $cache_autodel	= FALSE;
 	var $CACHE; // The cache class object
+    var $stricton = FALSE;
 
 	// Private variables
 	var $_protect_identifiers	= TRUE;

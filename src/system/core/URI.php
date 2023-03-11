@@ -29,6 +29,14 @@
 class CI_URI {
 
 	/**
+	 * Config class
+	 *
+	 * @var object
+	 * @access public
+	 */
+	var $config;
+
+	/**
 	 * List of cached uri segments
 	 *
 	 * @var array

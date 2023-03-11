@@ -67,6 +67,20 @@ class CI_Input {
 	 */
 	var $_enable_csrf			= FALSE;
 	/**
+	 * Security class
+	 *
+	 * @var object
+	 * @access public
+	 */
+	var $security;
+	/**
+	 * UNI class
+	 *
+	 * @var object
+	 * @access public
+	 */
+	var $uni;
+	/**
 	 * List of all HTTP request headers
 	 *
 	 * @var array

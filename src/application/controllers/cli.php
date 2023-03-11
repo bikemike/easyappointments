@@ -152,7 +152,8 @@ class cli extends CI_Controller
 				$this->db->where('id', $appointment_data['id'])->update('ea_appointments', array( 'notified' => 1) );
 			}
 
-			echo "Sending reminder email to " . $email_address . " for appointment " . $appointment_data['id'] . " on " . $appointment_data['start_datetime'];
+            $date = date('Y-m-d H:i:s');
+			echo $date . ": Sending reminder email to " . $email_address . " for appointment " . $appointment_data['id'] . " on " . $appointment_data['start_datetime'];
 			echo "\n";
 
 			if (!$simulate || $debug)
