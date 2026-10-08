@@ -78,13 +78,24 @@ var GeneralFunctions = {
     centerElementOnPage: function(elementHandle) {
         // Center main frame vertical middle
         $(window).resize(function() {
+            if ($(window).width() <= 700) {
+                elementHandle.css({
+                    position: 'relative',
+                    left: 'auto',
+                    top: 'auto',
+                    margin: '10px auto',
+                    maxWidth: '100%'
+                });
+                return;
+            }
+
             var elementLeft = ($(window).width() - elementHandle.outerWidth()) / 2;
             var elementTop = ($(window).height() - elementHandle.outerHeight()) / 2;
             elementTop = (elementTop > 0 ) ? elementTop : 20;
 
             elementHandle.css({
                 position: 'absolute',
-                left: elementLeft,
+                left: Math.max(0, elementLeft),
                 top: elementTop
             }); 
         });
