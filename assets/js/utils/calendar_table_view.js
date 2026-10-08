@@ -426,6 +426,19 @@ App.Utils.CalendarTableView = (function () {
     }
 
     /**
+     * Handle notes popover button click.
+     */
+    function onNotesPopoverClick() {
+        closePopover();
+
+        const data = lastFocusedEventData.extendedProps.data;
+
+        if (!isUnavailability(data) && !isWorkingPlanException(data)) {
+            App.Components.AppointmentNotesModal.open(data);
+        }
+    }
+
+    /**
      * Handle delete popover button click.
      */
     function onDeletePopoverClick() {
@@ -1620,6 +1633,10 @@ App.Utils.CalendarTableView = (function () {
         // Popover edit button
 
         $calendar.on('click', '.edit-popover', onEditPopoverClick);
+
+        // Popover session notes button
+
+        $calendar.on('click', '.notes-popover', onNotesPopoverClick);
 
         // Popover delete button
 

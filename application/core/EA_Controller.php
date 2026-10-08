@@ -174,7 +174,7 @@ class EA_Controller extends CI_Controller
             return;
         }
 
-        $default_timezone = setting('default_timezone');
+        $default_timezone = setting('default_timezone') ?: 'America/Vancouver';
 
         date_default_timezone_set($default_timezone);
     }

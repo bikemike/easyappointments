@@ -49,10 +49,10 @@
 $active_group = 'default';
 $query_builder = TRUE;
 
-$db['default']['hostname'] = Config::DB_HOST;
-$db['default']['username'] = Config::DB_USERNAME;
-$db['default']['password'] = Config::DB_PASSWORD;
-$db['default']['database'] = Config::DB_NAME;
+$db['default']['hostname'] = getenv('DB_HOST') ?: Config::DB_HOST;
+$db['default']['username'] = getenv('DB_USERNAME') ?: Config::DB_USERNAME;
+$db['default']['password'] = getenv('DB_PASSWORD') ?: Config::DB_PASSWORD;
+$db['default']['database'] = getenv('DB_NAME') ?: Config::DB_NAME;
 $db['default']['dbdriver'] = 'mysqli';
 $db['default']['dbprefix'] = 'ea_';
 $db['default']['pconnect'] = FALSE;

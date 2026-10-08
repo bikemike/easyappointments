@@ -136,6 +136,51 @@ App.Pages.Calendar = (function () {
     }
 
     /**
+     * Check for completed appointments awaiting session notes.
+     */
+    function checkPendingSessionNotes() {
+        if (vars('role_slug') === 'customer') {
+            return;
+        }
+
+        App.Http.AppointmentNotes.getPending(5, 30).done((response) => {
+            if (!response.pending || response.pending.length === 0) {
+                return;
+            }
+
+            const count = response.pending.length;
+            const message = lang('pending_notes_banner')
+                ? lang('pending_notes_banner').replace('%d', count)
+                : `You have ${count} completed appointment(s) awaiting session notes.`;
+
+            const $banner = $(`
+                <div id="pending-notes-alert" class="alert alert-warning alert-dismissible fade show d-flex align-items-center justify-content-between mb-3 mx-3 shadow-sm" role="alert">
+                    <div>
+                        <i class="fas fa-notes-medical me-2 text-warning"></i>
+                        <strong>${lang('session_notes')}:</strong> ${message}
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <button type="button" class="btn btn-sm btn-dark me-2" id="btn-review-pending-notes">
+                            <i class="fas fa-edit me-1"></i> ${lang('write_notes') || 'Write Notes'}
+                        </button>
+                        <button type="button" class="btn-close position-static" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+            `);
+
+            $('#calendar-toolbar').after($banner);
+
+            $banner.on('click', '#btn-review-pending-notes', () => {
+                const firstApt = response.pending[0];
+                App.Components.AppointmentNotesModal.open(firstApt, () => {
+                    $('#pending-notes-alert').remove();
+                    checkPendingSessionNotes();
+                });
+            });
+        });
+    }
+
+    /**
      * Initialize the module.
      *
      * This function makes the necessary initialization for the default backend calendar page.
@@ -151,6 +196,8 @@ App.Pages.Calendar = (function () {
         }
 
         App.Pages.Calendar.addEventListeners();
+
+        checkPendingSessionNotes();
     }
 
     document.addEventListener('DOMContentLoaded', initialize);

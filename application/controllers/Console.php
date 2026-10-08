@@ -173,6 +173,201 @@ class Console extends EA_Controller
     }
 
     /**
+     * Send email reminder notifications to clients for upcoming appointments.
+     * Ported from legacy cli.php logic.
+     *
+     * Usage:
+     * php index.php console reminders
+     * php index.php console reminders 1       (simulate/dry-run)
+     *
+     * @param mixed $simulate
+     */
+    public function reminders(mixed $simulate = false): void
+    {
+        $is_simulate = filter_var($simulate, FILTER_VALIDATE_BOOLEAN);
+
+        $this->load->model('appointments_model');
+        $this->load->model('services_model');
+        $this->load->model('customers_model');
+        $this->load->model('providers_model');
+        $this->load->model('settings_model');
+        $this->load->library('notifications');
+        $this->load->library('email_messages');
+
+        $query = $this->db
+            ->select('*')
+            ->from('appointments')
+            ->where('is_unavailability', 0)
+            ->where('status !=', 'Cancelled')
+            ->where('id_services IS NOT NULL', null, false)
+            ->where('notified', 0)
+            ->where('start_datetime > NOW()', null, false)
+            ->where('DATE_SUB(DATE(start_datetime), INTERVAL 37 HOUR) < NOW()', null, false)
+            ->where('book_datetime < DATE_SUB(start_datetime, INTERVAL 36 HOUR)', null, false)
+            ->get();
+
+        $appointments = $query->result_array();
+
+        if (empty($appointments)) {
+            response(PHP_EOL . 'No upcoming appointments require reminders.' . PHP_EOL . PHP_EOL);
+            return;
+        }
+
+        response(PHP_EOL . 'Sending reminder emails for ' . count($appointments) . ' appointment(s):' . PHP_EOL);
+
+        $company_settings = [
+            'company_name' => setting('company_name'),
+            'company_link' => setting('company_link'),
+            'company_email' => setting('company_email'),
+            'date_format' => setting('date_format'),
+            'time_format' => setting('time_format'),
+        ];
+
+        foreach ($appointments as $appointment) {
+            $service = $this->services_model->find($appointment['id_services']);
+            $customer = $this->customers_model->find($appointment['id_users_customer']);
+            $provider = $this->providers_model->find($appointment['id_users_provider']);
+
+            if (!$customer || empty($customer['email'])) {
+                continue;
+            }
+
+            $subject = lang('appointment_reminder') ?: 'Appointment Reminder';
+            $message = lang('thank_you_for_appointment') ?: '';
+            $customer_link = site_url('booking/reschedule/' . $appointment['hash']);
+
+            response('⇾ Reminder to ' . $customer['email'] . ' for appointment #' . $appointment['id'] . ' (' . $appointment['start_datetime'] . ')' . PHP_EOL);
+
+            if (!$is_simulate) {
+                $this->db->where('id', $appointment['id'])->update('appointments', ['notified' => 1]);
+
+                try {
+                    $this->email_messages->send_appointment_saved(
+                        $appointment,
+                        $provider,
+                        $service,
+                        $customer,
+                        $company_settings,
+                        $subject,
+                        $message,
+                        $customer_link,
+                        $customer['email'],
+                        '',
+                        $customer['timezone']
+                    );
+                } catch (Throwable $e) {
+                    response('  [ERROR] Failed to send email: ' . $e->getMessage() . PHP_EOL);
+                }
+            } else {
+                response('  [SIMULATED - email not sent]' . PHP_EOL);
+            }
+        }
+
+        response(PHP_EOL . 'Reminder task completed.' . PHP_EOL . PHP_EOL);
+    }
+
+    public function send_reminders(mixed $simulate = false): void
+    {
+        $this->reminders($simulate);
+    }
+
+    public function send_appointment_reminders(mixed $simulate = false): void
+    {
+        $this->reminders($simulate);
+    }
+
+    /**
+     * Test Appointment Notes model functionality.
+     */
+    public function test_notes(): void
+    {
+        $this->load->model('appointment_notes_model');
+        $this->load->model('appointments_model');
+
+        $apt = $this->db
+            ->where('status !=', 'Cancelled')
+            ->where('is_unavailability', 0)
+            ->where('id_users_customer IS NOT NULL', null, false)
+            ->get('appointments', 1)
+            ->row_array();
+        if (!$apt) {
+            response("No appointment found!\n");
+            return;
+        }
+        response("Testing with Appointment ID: " . $apt['id'] . ", Customer: " . $apt['id_users_customer'] . "\n");
+
+        $note_text = "Clinical observation test on " . date('Y-m-d H:i:s') . ". Client responded well to treatment.";
+        $note_id = $this->appointment_notes_model->save([
+            'id_appointments' => $apt['id'],
+            'id_users_customer' => $apt['id_users_customer'],
+            'id_users_provider' => $apt['id_users_provider'],
+            'notes' => $note_text,
+        ]);
+        response("Saved note ID: $note_id\n");
+
+        $note = $this->appointment_notes_model->get_by_appointment($apt['id']);
+        response("Retrieved note: " . ($note['notes'] === $note_text ? "MATCH" : "MISMATCH") . "\n");
+
+        $cust_notes = $this->appointment_notes_model->get_by_customer($apt['id_users_customer']);
+        response("Customer notes count: " . count($cust_notes) . "\n");
+
+        $pending = $this->appointment_notes_model->get_pending_appointments(null, 5, 60);
+        response("Pending appointments count (last 60 days): " . count($pending) . "\n");
+        if (!empty($pending)) {
+            response("First pending apt ID: " . $pending[0]['appointment_id'] . " - Client: " . $pending[0]['customer_first_name'] . " " . $pending[0]['customer_last_name'] . "\n");
+        }
+
+        response("All Appointment Notes Model tests passed!\n");
+    }
+
+    /**
+     * Create an authenticated session file for testing.
+     *
+     * @param string $username
+     */
+    public function create_session(string $username = 'admin'): void
+    {
+        $this->load->model('users_model');
+        $this->load->model('roles_model');
+
+        $user_settings = $this->db->get_where('user_settings', ['username' => $username])->row_array();
+        if (!$user_settings) {
+            response("User not found: $username\n");
+            return;
+        }
+
+        $user = $this->users_model->find($user_settings['id_users']);
+        $role = $this->roles_model->find($user['id_roles']);
+
+        $session_id = bin2hex(random_bytes(20));
+        $session_data = [
+            '__ci_last_regenerate' => time(),
+            'user_id' => (int) $user['id'],
+            'user_email' => $user['email'],
+            'username' => $username,
+            'timezone' => !empty($user['timezone']) ? $user['timezone'] : 'America/Vancouver',
+            'language' => !empty($user['language']) ? $user['language'] : 'english',
+            'role_slug' => $role['slug'],
+        ];
+
+        $serialized = '';
+        foreach ($session_data as $key => $val) {
+            $serialized .= $key . '|' . serialize($val);
+        }
+
+        $session_file = APPPATH . '../storage/sessions/ea_session' . $session_id;
+        file_put_contents($session_file, $serialized);
+        chmod($session_file, 0666);
+
+        $docker_ip_prefix = '122c4a55d1a70cef972cac3982dd49a6';
+        $session_file_docker = APPPATH . '../storage/sessions/ea_session' . $docker_ip_prefix . $session_id;
+        file_put_contents($session_file_docker, $serialized);
+        chmod($session_file_docker, 0666);
+
+        response("SESSION_ID=" . $session_id . PHP_EOL);
+    }
+
+    /**
      * Show help information about the console capabilities.
      *
      * Use this method to see the available commands.
@@ -202,6 +397,9 @@ class Console extends EA_Controller
             '⇾ php index.php console backup',
             '⇾ php index.php console sync',
             '⇾ php index.php console cleanup    (cleans sessions, logs, cache, and customer data)',
+            '⇾ php index.php console reminders  (send upcoming appointment reminders to clients)',
+            '⇾ php index.php console create_session [username] (generate login session for testing)',
+            '⇾ php index.php console test_notes (verify appointment notes model functionality)',
             '',
             '',
         ];

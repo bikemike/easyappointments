@@ -471,8 +471,8 @@ class Calendar extends EA_Controller
                 'time_format' => setting('time_format'),
             ];
 
-            // Delete appointment record from the database.
-            $this->appointments_model->delete($appointment_id);
+            // Delete appointment record from the database (soft-delete with cancellation reason).
+            $this->appointments_model->delete($appointment_id, true, $cancellation_reason);
 
             if ($notify_users) {
                 $this->notifications->notify_appointment_deleted(
@@ -663,6 +663,7 @@ class Calendar extends EA_Controller
                 'appointments' => $this->appointments_model->get([
                     'start_datetime >=' => $start_date,
                     'end_datetime <=' => $end_date,
+                    'status !=' => 'Cancelled',
                 ]),
                 'unavailabilities' => $this->unavailabilities_model->get([
                     'start_datetime >=' => $start_date,

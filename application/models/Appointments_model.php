@@ -347,14 +347,40 @@ class Appointments_model extends EA_Model
     }
 
     /**
-     * Remove an existing appointment from the database.
+    /**
+     * Remove or soft-delete an existing appointment from the database.
      *
      * @param int $appointment_id Appointment ID.
+     * @param bool $soft_delete Whether to mark as Cancelled instead of deleting row.
+     * @param string $notes Deletion reason / notes.
      *
      * @throws RuntimeException
      */
-    public function delete(int $appointment_id): void
+    public function delete(int $appointment_id, bool $soft_delete = true, string $notes = ''): void
     {
+        $appointment = $this->find($appointment_id);
+
+        if (!$appointment) {
+            return;
+        }
+
+        if ($soft_delete && empty($appointment['is_unavailability'])) {
+            $update_data = [
+                'status' => 'Cancelled',
+                'type' => 3,
+            ];
+
+            if (!empty($notes)) {
+                $existing_notes = trim($appointment['notes'] ?? '');
+                $update_data['notes'] = !empty($existing_notes)
+                    ? $existing_notes . "\nDELETION NOTE: " . $notes
+                    : "DELETION NOTE: " . $notes;
+            }
+
+            $this->db->update('appointments', $update_data, ['id' => $appointment_id]);
+            return;
+        }
+
         $this->db->delete('appointments', ['id' => $appointment_id]);
     }
 
@@ -395,6 +421,7 @@ class Appointments_model extends EA_Model
             ->group_end()
             ->where('id_services', $service_id)
             ->where('id_users_provider', $provider_id)
+            ->where('status !=', 'Cancelled')
             ->get()
             ->row_array();
 
@@ -439,6 +466,7 @@ class Appointments_model extends EA_Model
             ->group_end()
             ->where('id_services !=', $service_id)
             ->where('id_users_provider', $provider_id)
+            ->where('status !=', 'Cancelled')
             ->get()
             ->row_array();
 
@@ -737,6 +765,8 @@ class Appointments_model extends EA_Model
         // An overlap occurs when:  (existing_start < new_end) AND (existing_end > new_start)
 
         return $this->db
+            ->where('status !=', 'Cancelled')
+            ->where('is_unavailability', 0)
             ->group_start()
             ->where('start_datetime <', $end_datetime)
             ->where('end_datetime >', $start_datetime)
