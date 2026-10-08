@@ -148,23 +148,23 @@ App.Utils.CalendarTableView = (function () {
                 break;
             case 'MDY':
             case 'YMD':
+            default:
                 columnFormat = 'ddd M/D';
                 break;
-            default:
-                throw new Error('Invalid date format setting: ' + vars('date_format'));
         }
 
         switch (vars('time_format')) {
             case 'military':
+            case '24':
                 timeFormat = 'HH:mm';
                 slotTimeFormat = 'HH:mm';
                 break;
             case 'regular':
+            case '12':
+            default:
                 timeFormat = 'h:mm a';
                 slotTimeFormat = 'h a';
                 break;
-            default:
-                throw new Error('Invalid time format setting: ' + vars('time_format'));
         }
 
         return {columnFormat, timeFormat, slotTimeFormat};
