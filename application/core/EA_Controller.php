@@ -141,12 +141,21 @@ class EA_Controller extends CI_Controller
      */
     private function load_common_html_vars()
     {
+        $hide_timezone = $this->db->table_exists('settings')
+            ? (bool) (int) setting('hide_timezone', 1)
+            : true;
+        $default_timezone = $this->db->table_exists('settings')
+            ? (setting('default_timezone') ?: 'America/Vancouver')
+            : 'America/Vancouver';
+
         html_vars([
             'base_url' => config('base_url'),
             'index_page' => config('index_page'),
             'available_languages' => config('available_languages'),
             'language' => $this->lang->language,
             'csrf_token' => $this->security->get_csrf_hash(),
+            'default_timezone' => $default_timezone,
+            'hide_timezone' => $hide_timezone,
         ]);
     }
 
@@ -155,6 +164,13 @@ class EA_Controller extends CI_Controller
      */
     private function load_common_script_vars()
     {
+        $hide_timezone = $this->db->table_exists('settings')
+            ? (bool) (int) setting('hide_timezone', 1)
+            : true;
+        $default_timezone = $this->db->table_exists('settings')
+            ? (setting('default_timezone') ?: 'America/Vancouver')
+            : 'America/Vancouver';
+
         script_vars([
             'base_url' => config('base_url'),
             'index_page' => config('index_page'),
@@ -162,6 +178,8 @@ class EA_Controller extends CI_Controller
             'csrf_token' => $this->security->get_csrf_hash(),
             'language' => config('language'),
             'language_code' => config('language_code'),
+            'default_timezone' => $default_timezone,
+            'hide_timezone' => $hide_timezone,
         ]);
     }
 
@@ -174,7 +192,7 @@ class EA_Controller extends CI_Controller
             return;
         }
 
-        $default_timezone = setting('default_timezone');
+        $default_timezone = setting('default_timezone') ?: 'America/Vancouver';
 
         date_default_timezone_set($default_timezone);
     }

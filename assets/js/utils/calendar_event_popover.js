@@ -244,7 +244,7 @@ App.Utils.CalendarEventPopover = (function () {
                 ...createPopoverRow('provider', provider.first_name + ' ' + provider.last_name),
                 ...createPopoverRow('start', formatTimeOrDash(startTime)),
                 ...createPopoverRow('end', formatTimeOrDash(endTime)),
-                ...createPopoverRow('timezone', startTime ? vars('timezones')[provider.timezone] : '-'),
+                ...(vars('hide_timezone') ? [] : createPopoverRow('timezone', startTime ? vars('timezones')[provider.timezone] : '-')),
                 isNonWorking ? $('<p/>', {class: 'mt-2 mb-0 text-muted', text: lang('make_non_working_day')}) : null,
                 renderCustomContent(info),
                 $('<hr/>'),
@@ -277,7 +277,7 @@ App.Utils.CalendarEventPopover = (function () {
             html: [
                 ...createPopoverRow('start', formatDateTime(info.event.start)),
                 ...createPopoverRow('end', formatDateTime(info.event.end)),
-                ...createPopoverRow('timezone', vars('timezones')[provider.timezone]),
+                ...(vars('hide_timezone') ? [] : createPopoverRow('timezone', vars('timezones')[provider.timezone])),
                 ...createPopoverRow('status', data.status || '-'),
                 ...createPopoverRow('service', data.service.name),
                 $('<strong/>', {class: 'd-inline-block me-2', text: lang('provider')}),

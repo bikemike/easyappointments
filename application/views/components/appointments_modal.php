@@ -160,6 +160,7 @@
                                     <input id="end-datetime" class="required form-control">
                                 </div>
 
+                                <?php if (!vars('hide_timezone')): ?>
                                 <div class="mb-3">
                                     <label class="form-label">
                                         <?= lang('timezone') ?>
@@ -185,6 +186,7 @@
                                         </div>
                                     </div>
                                 </div>
+                                <?php endif; ?>
 
                                 <div class="mb-3">
                                     <label for="appointment-notes" class="form-label">
@@ -332,7 +334,7 @@
                                            maxlength="120"/>
                                 </div>
 
-                                <div class="mb-3">
+                                <div class="mb-3" <?= vars('hide_timezone') ? 'style="display: none !important;" hidden' : '' ?>>
                                     <label class="form-label" for="timezone">
                                         <?= lang('timezone') ?>
                                         <span class="text-danger" hidden>*</span>
