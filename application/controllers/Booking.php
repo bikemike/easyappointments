@@ -221,7 +221,7 @@ class Booking extends EA_Controller
 
             $results = $this->appointments_model->get(['hash' => $appointment_hash]);
 
-            if (empty($results)) {
+            if (empty($results) || ($results[0]['status'] ?? '') === 'Cancelled' || in_array((int) ($results[0]['type'] ?? 0), [3, 4])) {
                 html_vars([
                     'show_message' => true,
                     'page_title' => lang('page_title') . ' ' . $company_name,

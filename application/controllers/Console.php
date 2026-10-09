@@ -173,6 +173,110 @@ class Console extends EA_Controller
     }
 
     /**
+     * Send email reminder notifications to clients for upcoming appointments.
+     * Ported from legacy cli.php logic.
+     *
+     * Usage:
+     * php index.php console reminders
+     * php index.php console reminders 1       (simulate/dry-run)
+     *
+     * @param mixed $simulate
+     */
+    public function reminders(mixed $simulate = false): void
+    {
+        $is_simulate = filter_var($simulate, FILTER_VALIDATE_BOOLEAN);
+
+        $this->load->model('appointments_model');
+        $this->load->model('services_model');
+        $this->load->model('customers_model');
+        $this->load->model('providers_model');
+        $this->load->model('settings_model');
+        $this->load->library('notifications');
+        $this->load->library('email_messages');
+
+        $query = $this->db
+            ->select('*')
+            ->from('appointments')
+            ->where('is_unavailability', 0)
+            ->where('status !=', 'Cancelled')
+            ->where('id_services IS NOT NULL', null, false)
+            ->where('notified', 0)
+            ->where('start_datetime > NOW()', null, false)
+            ->where('DATE_SUB(DATE(start_datetime), INTERVAL 37 HOUR) < NOW()', null, false)
+            ->where('book_datetime < DATE_SUB(start_datetime, INTERVAL 36 HOUR)', null, false)
+            ->get();
+
+        $appointments = $query->result_array();
+
+        if (empty($appointments)) {
+            response(PHP_EOL . 'No upcoming appointments require reminders.' . PHP_EOL . PHP_EOL);
+            return;
+        }
+
+        response(PHP_EOL . 'Sending reminder emails for ' . count($appointments) . ' appointment(s):' . PHP_EOL);
+
+        $company_settings = [
+            'company_name' => setting('company_name'),
+            'company_link' => setting('company_link'),
+            'company_email' => setting('company_email'),
+            'date_format' => setting('date_format'),
+            'time_format' => setting('time_format'),
+        ];
+
+        foreach ($appointments as $appointment) {
+            $service = $this->services_model->find($appointment['id_services']);
+            $customer = $this->customers_model->find($appointment['id_users_customer']);
+            $provider = $this->providers_model->find($appointment['id_users_provider']);
+
+            if (!$customer || empty($customer['email'])) {
+                continue;
+            }
+
+            $subject = lang('appointment_reminder') ?: 'Appointment Reminder';
+            $message = lang('thank_you_for_appointment') ?: '';
+            $customer_link = site_url('booking/reschedule/' . $appointment['hash']);
+
+            response('⇾ Reminder to ' . $customer['email'] . ' for appointment #' . $appointment['id'] . ' (' . $appointment['start_datetime'] . ')' . PHP_EOL);
+
+            if (!$is_simulate) {
+                $this->db->where('id', $appointment['id'])->update('appointments', ['notified' => 1]);
+
+                try {
+                    $this->email_messages->send_appointment_saved(
+                        $appointment,
+                        $provider,
+                        $service,
+                        $customer,
+                        $company_settings,
+                        $subject,
+                        $message,
+                        $customer_link,
+                        $customer['email'],
+                        '',
+                        $customer['timezone']
+                    );
+                } catch (Throwable $e) {
+                    response('  [ERROR] Failed to send email: ' . $e->getMessage() . PHP_EOL);
+                }
+            } else {
+                response('  [SIMULATED - email not sent]' . PHP_EOL);
+            }
+        }
+
+        response(PHP_EOL . 'Reminder task completed.' . PHP_EOL . PHP_EOL);
+    }
+
+    public function send_reminders(mixed $simulate = false): void
+    {
+        $this->reminders($simulate);
+    }
+
+    public function send_appointment_reminders(mixed $simulate = false): void
+    {
+        $this->reminders($simulate);
+    }
+
+    /**
      * Show help information about the console capabilities.
      *
      * Use this method to see the available commands.
@@ -202,6 +306,7 @@ class Console extends EA_Controller
             '⇾ php index.php console backup',
             '⇾ php index.php console sync',
             '⇾ php index.php console cleanup    (cleans sessions, logs, cache, and customer data)',
+            '⇾ php index.php console reminders  (send upcoming appointment reminders to clients)',
             '',
             '',
         ];
