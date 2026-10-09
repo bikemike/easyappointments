@@ -167,6 +167,29 @@ App.Utils.CalendarEventPopover = (function () {
     }
 
     /**
+     * Create the appointment popover action buttons including session notes.
+     *
+     * @param {string} displayEdit - CSS class to show/hide edit button.
+     * @param {string} displayDelete - CSS class to show/hide delete button.
+     * @returns {jQuery} Button container element.
+     */
+    function createAppointmentPopoverButtons(displayEdit, displayDelete) {
+        return $('<div/>', {
+            class: 'd-flex justify-content-center flex-wrap gap-1',
+            html: [
+                createPopoverButton('close-popover btn btn-outline-secondary btn-sm', 'fas fa-ban', 'close'),
+                createPopoverButton(
+                    'delete-popover btn btn-outline-secondary btn-sm ' + displayDelete,
+                    'fas fa-trash-alt',
+                    'delete',
+                ),
+                createPopoverButton('edit-popover btn btn-primary btn-sm ' + displayEdit, 'fas fa-edit', 'edit'),
+                createPopoverButton('notes-popover btn btn-outline-info btn-sm', 'fas fa-notes-medical', 'session_notes'),
+            ],
+        });
+    }
+
+    /**
      * Create a labeled text row for popover content.
      *
      * @param {string} labelKey - Language key for label.
@@ -331,7 +354,7 @@ App.Utils.CalendarEventPopover = (function () {
                 ...createPopoverRow('notes', getEventNotes(info.event)),
                 renderCustomContent(info),
                 $('<hr/>'),
-                createPopoverButtons(displayEdit, displayDelete),
+                createAppointmentPopoverButtons(displayEdit, displayDelete),
             ],
         });
     }

@@ -135,6 +135,7 @@
 ]); ?>
 
 <?php component('working_plan_exceptions_modal'); ?>
+<?php component('appointment_notes_modal'); ?>
 
 <?php end_section('content'); ?>
 
@@ -147,6 +148,8 @@
 <script src="<?= asset_url('assets/js/utils/calendar_default_view.js') ?>"></script>
 <script src="<?= asset_url('assets/js/utils/calendar_table_view.js') ?>"></script>
 <script src="<?= asset_url('assets/js/utils/calendar_event_popover.js') ?>"></script>
+<script src="<?= asset_url('assets/js/http/appointment_notes_http_client.js') ?>"></script>
+<script src="<?= asset_url('assets/js/components/appointment_notes_modal.js') ?>"></script>
 <script src="<?= asset_url('assets/js/http/calendar_http_client.js') ?>"></script>
 <script src="<?= asset_url('assets/js/http/customers_http_client.js') ?>"></script>
 <?php if (vars('calendar_view') === CALENDAR_VIEW_DEFAULT): ?>
