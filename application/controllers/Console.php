@@ -338,6 +338,97 @@ class Console extends EA_Controller
     }
 
     /**
+     * Test Appointment Notes model functionality.
+     */
+    public function test_notes(): void
+    {
+        $this->load->model('appointment_notes_model');
+        $this->load->model('appointments_model');
+
+        $apt = $this->db
+            ->where('status !=', 'Cancelled')
+            ->where('is_unavailability', 0)
+            ->where('id_users_customer IS NOT NULL', null, false)
+            ->get('appointments', 1)
+            ->row_array();
+        if (!$apt) {
+            response("No appointment found!\n");
+            return;
+        }
+        response("Testing with Appointment ID: " . $apt['id'] . ", Customer: " . $apt['id_users_customer'] . "\n");
+
+        $note_text = "Clinical observation test on " . date('Y-m-d H:i:s') . ". Client responded well to treatment.";
+        $note_id = $this->appointment_notes_model->save([
+            'id_appointments' => $apt['id'],
+            'id_users_customer' => $apt['id_users_customer'],
+            'id_users_provider' => $apt['id_users_provider'],
+            'notes' => $note_text,
+        ]);
+        response("Saved note ID: $note_id\n");
+
+        $note = $this->appointment_notes_model->get_by_appointment($apt['id']);
+        response("Retrieved note: " . ($note['notes'] === $note_text ? "MATCH" : "MISMATCH") . "\n");
+
+        $cust_notes = $this->appointment_notes_model->get_by_customer($apt['id_users_customer']);
+        response("Customer notes count: " . count($cust_notes) . "\n");
+
+        $pending = $this->appointment_notes_model->get_pending_appointments(null, 5, 60);
+        response("Pending appointments count (last 60 days): " . count($pending) . "\n");
+        if (!empty($pending)) {
+            response("First pending apt ID: " . $pending[0]['appointment_id'] . " - Client: " . $pending[0]['customer_first_name'] . " " . $pending[0]['customer_last_name'] . "\n");
+        }
+
+        response("All Appointment Notes Model tests passed!\n");
+    }
+
+    /**
+     * Create an authenticated session file for testing.
+     *
+     * @param string $username
+     */
+    public function create_session(string $username = 'admin'): void
+    {
+        $this->load->model('users_model');
+        $this->load->model('roles_model');
+
+        $user_settings = $this->db->get_where('user_settings', ['username' => $username])->row_array();
+        if (!$user_settings) {
+            response("User not found: $username\n");
+            return;
+        }
+
+        $user = $this->users_model->find($user_settings['id_users']);
+        $role = $this->roles_model->find($user['id_roles']);
+
+        $session_id = bin2hex(random_bytes(20));
+        $session_data = [
+            '__ci_last_regenerate' => time(),
+            'user_id' => (int) $user['id'],
+            'user_email' => $user['email'],
+            'username' => $username,
+            'timezone' => !empty($user['timezone']) ? $user['timezone'] : 'America/Vancouver',
+            'language' => !empty($user['language']) ? $user['language'] : 'english',
+            'role_slug' => $role['slug'],
+        ];
+
+        $serialized = '';
+        foreach ($session_data as $key => $val) {
+            $serialized .= $key . '|' . serialize($val);
+        }
+
+        $session_file = APPPATH . '../storage/sessions/ea_session' . $session_id;
+        file_put_contents($session_file, $serialized);
+        chmod($session_file, 0666);
+
+        $docker_ip_prefix = '122c4a55d1a70cef972cac3982dd49a6';
+        $session_file_docker = APPPATH . '../storage/sessions/ea_session' . $docker_ip_prefix . $session_id;
+        file_put_contents($session_file_docker, $serialized);
+        chmod($session_file_docker, 0666);
+
+        response("SESSION_ID=" . $session_id . PHP_EOL);
+    }
+
+    /**
      * Show help information about the console capabilities.
      *
      * Use this method to see the available commands.
@@ -369,6 +460,8 @@ class Console extends EA_Controller
             '⇾ php index.php console cleanup    (cleans sessions, logs, cache, and customer data)',
             '⇾ php index.php console reminders  (send upcoming appointment reminders to clients)',
             '⇾ php index.php console send_test_email [to_address] (send a test email to verify mail delivery)',
+            '⇾ php index.php console create_session [username] (generate login session for testing)',
+            '⇾ php index.php console test_notes (verify appointment notes model functionality)',
             '',
             '',
         ];
