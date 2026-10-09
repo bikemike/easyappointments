@@ -350,7 +350,7 @@ App.Utils.CalendarDefaultView = (function () {
 
         const data = lastFocusedEventData.extendedProps.data;
 
-        if (!isUnavailability(data) && !isWorkingPlanException(data)) {
+        if (!isUnavailability(data) && !isWorkingPlanException(data) && !isOneOffAvailability(data)) {
             App.Components.AppointmentNotesModal.open(data);
         }
     }
@@ -1479,7 +1479,12 @@ App.Utils.CalendarDefaultView = (function () {
      * Populate the filter dropdown with providers and services.
      */
     function populateFilterDropdown() {
-        $selectFilterItem.append(new Option(lang('all'), FILTER_TYPE_ALL, true, true));
+        $('<option/>', {
+            value: FILTER_TYPE_ALL,
+            type: FILTER_TYPE_ALL,
+            text: lang('all'),
+            selected: true,
+        }).appendTo($selectFilterItem);
 
         if (vars('available_providers').length > 0) {
             $('<optgroup/>', {

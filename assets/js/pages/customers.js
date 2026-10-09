@@ -396,6 +396,23 @@ App.Pages.Customers = (function () {
                         : $('<small/>', {
                               'text': vars('timezones')[appointment.provider.timezone],
                           }),
+
+                    appointment.status === 'Cancelled'
+                        ? $('<div/>', {
+                              'class': 'mt-1',
+                              'html': $('<span/>', {
+                                  'class': 'badge bg-danger',
+                                  'text': lang('canceled') || 'Cancelled',
+                              }),
+                          })
+                        : '',
+
+                    appointment.notes
+                        ? $('<div/>', {
+                              'class': 'mt-1 p-1 bg-light border rounded small text-break',
+                              'text': appointment.notes,
+                          })
+                        : '',
                 ],
             }).appendTo('#customer-appointments');
         });

@@ -416,6 +416,13 @@ $customer_address = trim((string) ($customer['address'] ?? ''));
                                             <?= $message ?>
                                         </p>
 
+                                        <div style="background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 4px; padding: 12px; margin: 16px 0; font-size: 13px; line-height: 1.5;">
+                                            <p style="margin: 0 0 8px 0;"><strong>Please note:</strong> If your appointment time is after 6pm or on a Saturday, the main doors into the Atrium will be locked. Please enter the building through Habit Coffee on the corner of Yates and Blanshard and wait by the elevators on the ground floor. Your therapist will come down to bring you up.</p>
+                                            <p style="margin: 0 0 8px 0;">If you have any issues finding us, please call or text your therapist:</p>
+                                            <p style="margin: 0 0 8px 0;"><strong>Wellness At The Atrium</strong><br/>1321 Blanshard Street, Suite 301 on the 3rd floor.<br/>Alix Morrison, RMT: (250) 857-8969<br/>Tara Tait, RMT: (250) 882-7713</p>
+                                            <p style="margin: 0; color: #6c757d;"><strong>Cancellation Policy:</strong> We require at least 24 hours notice for cancellations. Should an appointment be missed without notice, the full appointment fee will apply.</p>
+                                        </div>
+
                                         <h2 style="text-align: center;">
                                             <?= lang('appointment_details_title') ?>
                                         </h2>

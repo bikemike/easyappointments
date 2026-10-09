@@ -743,6 +743,7 @@ class Calendar extends EA_Controller
                 'appointments' => $this->appointments_model->get([
                     'start_datetime >=' => $start_date,
                     'end_datetime <=' => $end_date,
+                    'status !=' => 'Cancelled',
                 ]),
                 'unavailabilities' => $this->unavailabilities_model->get([
                     'start_datetime >=' => $start_date,
@@ -783,16 +784,6 @@ class Calendar extends EA_Controller
                 }
 
                 $response['unavailabilities'] = array_values($response['unavailabilities']);
-
-                foreach ($response['one_off_availabilities'] as $index => $one_off) {
-                    if ((int) $one_off['id_users_provider'] !== (int) $user_id) {
-                        unset($response['one_off_availabilities'][$index]);
-                    }
-                }
-
-                unset($one_off);
-
-                $response['one_off_availabilities'] = array_values($response['one_off_availabilities']);
             }
 
             // If the current user is a secretary he must only see the appointments of his providers.
@@ -934,6 +925,11 @@ class Calendar extends EA_Controller
             $this->db->group_end();
 
             $this->db->where('is_unavailability', 0);
+            $this->db->group_start()
+                ->where('type', 0)
+                ->or_where('type IS NULL', null, false)
+                ->group_end();
+            $this->db->where('status !=', 'Cancelled');
 
             $response['appointments'] = $this->db->get()->result_array();
 
@@ -947,6 +943,7 @@ class Calendar extends EA_Controller
 
             // Get unavailability periods (only for provider).
             $response['unavailabilities'] = [];
+            $response['one_off_availabilities'] = [];
 
             if ($filter_type == FILTER_TYPE_PROVIDER || $is_all) {
                 // Build query using CodeIgniter's query builder for SQL injection protection
