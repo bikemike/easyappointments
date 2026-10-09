@@ -436,7 +436,7 @@ class Customers_model extends EA_Model
             ->group_end()
             ->limit($limit)
             ->offset($offset)
-            ->order_by($this->quote_order_by($order_by))
+            ->order_by($this->quote_order_by($order_by ?: 'first_name ASC, last_name ASC'))
             ->get()
             ->result_array();
 
