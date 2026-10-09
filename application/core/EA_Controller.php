@@ -145,8 +145,8 @@ class EA_Controller extends CI_Controller
             ? (bool) (int) setting('hide_timezone', 1)
             : true;
         $default_timezone = $this->db->table_exists('settings')
-            ? (setting('default_timezone') ?: 'UTC')
-            : 'UTC';
+            ? (setting('default_timezone') ?: 'America/Vancouver')
+            : 'America/Vancouver';
 
         html_vars([
             'base_url' => config('base_url'),
@@ -168,8 +168,8 @@ class EA_Controller extends CI_Controller
             ? (bool) (int) setting('hide_timezone', 1)
             : true;
         $default_timezone = $this->db->table_exists('settings')
-            ? (setting('default_timezone') ?: 'UTC')
-            : 'UTC';
+            ? (setting('default_timezone') ?: 'America/Vancouver')
+            : 'America/Vancouver';
 
         script_vars([
             'base_url' => config('base_url'),
@@ -192,7 +192,7 @@ class EA_Controller extends CI_Controller
             return;
         }
 
-        $default_timezone = setting('default_timezone');
+        $default_timezone = setting('default_timezone') ?: 'America/Vancouver';
 
         date_default_timezone_set($default_timezone);
     }
