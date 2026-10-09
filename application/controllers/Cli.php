@@ -5,8 +5,8 @@ require_once __DIR__ . '/Console.php';
 /**
  * Legacy CLI controller.
  *
- * Provides backward compatibility for legacy cron jobs invoking:
- * php index.php cli send_appointment_reminders
+ * Provides backward compatibility for legacy cron jobs and scripts invoking:
+ * php index.php cli <command>
  */
 class Cli extends Console
 {
