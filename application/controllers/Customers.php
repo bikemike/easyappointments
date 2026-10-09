@@ -192,7 +192,7 @@ class Customers extends EA_Controller
 
             $keyword = request('keyword', '');
 
-            $order_by = request('order_by', 'update_datetime DESC');
+            $order_by = request('order_by', 'first_name ASC, last_name ASC');
 
             $limit = request('limit', 1000);
 

@@ -193,7 +193,7 @@ class Calendar extends EA_Controller
 
         $appointment_status_options = setting('appointment_status_options');
 
-        $customers = $this->customers_model->get(null, 50, null, 'update_datetime DESC');
+        $customers = $this->customers_model->get(null, 50, null, 'first_name ASC, last_name ASC');
 
         if (setting('limit_customer_access') && $role_slug === DB_SLUG_PROVIDER) {
             // Only include the customers that the provider is supposed to see (they had past booking together)
