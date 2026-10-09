@@ -167,6 +167,8 @@ class Customers_model extends EA_Model
 
         if ($order_by !== null) {
             $this->db->order_by($this->quote_order_by($order_by));
+        } else {
+            $this->db->order_by('first_name ASC, last_name ASC');
         }
 
         $customers = $this->db->get_where('users', ['id_roles' => $role_id], $limit, $offset)->result_array();

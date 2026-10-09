@@ -181,12 +181,32 @@ class Appointments_model extends EA_Model
         ?int $offset = null,
         ?string $order_by = null,
     ): array {
+        $has_type_filter = false;
+        $has_status_filter = false;
+        $has_id_filter = false;
+
         if ($where !== null) {
             $this->db->where($where);
+            if (is_array($where)) {
+                $has_type_filter = isset($where['type']) || isset($where['appointments.type']);
+                $has_status_filter = isset($where['status']) || isset($where['appointments.status']);
+                $has_id_filter = isset($where['id']) || isset($where['appointments.id']) || isset($where['hash']) || isset($where['appointments.hash']);
+            }
+        }
+
+        // By default, only return active booked appointments (type 0, not cancelled)
+        if (!$has_type_filter && !$has_status_filter && !$has_id_filter) {
+            $this->db->group_start()
+                ->where('type', 0)
+                ->or_where('type IS NULL', null, false)
+                ->group_end();
+            $this->db->where('status !=', 'Cancelled');
         }
 
         if ($order_by) {
             $this->db->order_by($this->quote_order_by($order_by));
+        } else {
+            $this->db->order_by('start_datetime', 'ASC');
         }
 
         $appointments = $this->db
@@ -347,14 +367,51 @@ class Appointments_model extends EA_Model
     }
 
     /**
-     * Remove an existing appointment from the database.
+     * Remove or soft-delete an existing appointment from the database.
      *
      * @param int $appointment_id Appointment ID.
+     * @param bool $soft_delete Whether to mark as Cancelled instead of deleting row.
+     * @param string $notes Deletion reason / notes.
+     * @param bool $admin_delete Whether deletion was triggered by admin (type 3) or customer (type 4).
      *
      * @throws RuntimeException
      */
-    public function delete(int $appointment_id): void
-    {
+    public function delete(
+        int $appointment_id,
+        bool $soft_delete = true,
+        string $notes = '',
+        bool $admin_delete = true,
+    ): void {
+        $appointment = $this->find($appointment_id);
+
+        if (!$appointment) {
+            return;
+        }
+
+        // Unavailabilities (type 1) and One-off availabilities (type 2) are hard-deleted
+        $type = (int) ($appointment['type'] ?? 0);
+        if (!empty($appointment['is_unavailability']) || $type === 1 || $type === 2) {
+            $this->db->delete('appointments', ['id' => $appointment_id]);
+            return;
+        }
+
+        if ($soft_delete) {
+            $update_data = [
+                'status' => 'Cancelled',
+                'type' => $admin_delete ? 3 : 4,
+            ];
+
+            if (!empty($notes)) {
+                $existing_notes = trim($appointment['notes'] ?? '');
+                $update_data['notes'] = !empty($existing_notes)
+                    ? $existing_notes . "\nDELETION NOTE: " . $notes
+                    : "DELETION NOTE: " . $notes;
+            }
+
+            $this->db->update('appointments', $update_data, ['id' => $appointment_id]);
+            return;
+        }
+
         $this->db->delete('appointments', ['id' => $appointment_id]);
     }
 
@@ -413,6 +470,7 @@ class Appointments_model extends EA_Model
             ->group_end()
             ->where('id_services', $service_id)
             ->where('id_users_provider', $provider_id)
+            ->where('status !=', 'Cancelled')
             ->get()
             ->row_array();
 
@@ -457,6 +515,7 @@ class Appointments_model extends EA_Model
             ->group_end()
             ->where('id_services !=', $service_id)
             ->where('id_users_provider', $provider_id)
+            ->where('status !=', 'Cancelled')
             ->get()
             ->row_array();
 
@@ -492,6 +551,11 @@ class Appointments_model extends EA_Model
             ->join('users AS providers', 'providers.id = appointments.id_users_provider', 'inner')
             ->join('users AS customers', 'customers.id = appointments.id_users_customer', 'left')
             ->where('is_unavailability', false)
+            ->group_start()
+            ->where('appointments.type', 0)
+            ->or_where('appointments.type IS NULL', null, false)
+            ->group_end()
+            ->where('appointments.status !=', 'Cancelled')
             ->group_start()
             ->like('appointments.start_datetime', $keyword)
             ->or_like('appointments.end_datetime', $keyword)
@@ -540,6 +604,11 @@ class Appointments_model extends EA_Model
             ->from('appointments')
             ->join('services', 'services.id = appointments.id_services', 'left')
             ->where('is_unavailability', false)
+            ->group_start()
+            ->where('appointments.type', 0)
+            ->or_where('appointments.type IS NULL', null, false)
+            ->group_end()
+            ->where('appointments.status !=', 'Cancelled')
             ->order_by('start_datetime', 'DESC')
             ->get()
             ->result_array();
@@ -755,6 +824,8 @@ class Appointments_model extends EA_Model
         // An overlap occurs when:  (existing_start < new_end) AND (existing_end > new_start)
 
         return $this->db
+            ->where('status !=', 'Cancelled')
+            ->where('is_unavailability', 0)
             ->group_start()
             ->where('start_datetime <', $end_datetime)
             ->where('end_datetime >', $start_datetime)

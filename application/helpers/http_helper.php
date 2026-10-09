@@ -253,11 +253,14 @@ if (!function_exists('method')) {
         /** @var EA_Controller $CI */
         $CI = &get_instance();
 
-        $current_method = $CI->input->method();
+        $current_method = strtoupper($CI->input->method());
+        $expected = strtoupper($expected_method);
 
-        if (strtoupper($current_method) !== strtoupper($expected_method)) {
-            throw new RuntimeException("Method not allowed. Expected {$expected_method}, got {$current_method}.");
+        if ($current_method === $expected || ($expected === 'GET' && $current_method === 'HEAD')) {
+            return;
         }
+
+        throw new RuntimeException("Method not allowed. Expected {$expected_method}, got {$current_method}.");
     }
 }
 

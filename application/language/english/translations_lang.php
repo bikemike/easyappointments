@@ -601,4 +601,5 @@ $lang['session_notes_recorded'] = 'Session notes recorded (click to view/edit)';
 $lang['session_notes_awaiting'] = 'Awaiting session notes (click to write)';
 $lang['close_window'] = 'Close Window';
 $lang['notes_cannot_be_empty'] = 'Session notes cannot be empty.';
+$lang['appointment_reminder'] = 'Appointment Reminder';
 // End
