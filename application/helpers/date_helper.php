@@ -25,7 +25,7 @@ if (!function_exists('get_date_format')) {
             'DMY' => 'd/m/Y',
             'MDY' => 'm/d/Y',
             'YMD' => 'Y/m/d',
-            default => throw new RuntimeException('Invalid date format value: ' . $date_format),
+            default => 'Y/m/d',
         };
     }
 }
@@ -41,9 +41,9 @@ if (!function_exists('get_time_format')) {
         $time_format = setting('time_format');
 
         return match ($time_format) {
-            'military' => 'H:i',
-            'regular' => 'g:i a',
-            default => throw new RuntimeException('Invalid time format value: ' . $time_format),
+            'military', '24' => 'H:i',
+            'regular', '12' => 'g:i a',
+            default => 'g:i a',
         };
     }
 }
