@@ -7,11 +7,11 @@
  */
 ?>
 
-<div id="unavailabilities-modal" class="modal fade">
+<div id="one-off-availabilities-modal" class="modal fade">
     <div class="modal-dialog modal-dialog-centered modal-fullscreen-lg-down">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title"><?= lang('new_unavailability_title') ?></h3>
+                <h3 class="modal-title"><?= lang('new_one_off_availability_title') ?></h3>
                 <button class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -19,29 +19,29 @@
 
                 <form>
                     <fieldset>
-                        <input id="unavailability-id" type="hidden">
+                        <input id="one-off-availability-id" type="hidden">
 
                         <div class="mb-3">
-                            <label for="unavailability-provider" class="form-label">
+                            <label for="one-off-availability-provider" class="form-label">
                                 <?= lang('provider') ?>
                             </label>
-                            <select id="unavailability-provider" class="form-select"></select>
+                            <select id="one-off-availability-provider" class="form-select"></select>
                         </div>
 
                         <div class="mb-3">
-                            <label for="unavailability-start" class="form-label">
+                            <label for="one-off-availability-start" class="form-label">
                                 <?= lang('start') ?>
                                 <span class="text-danger">*</span>
                             </label>
-                            <input id="unavailability-start" class="form-control">
+                            <input id="one-off-availability-start" class="form-control">
                         </div>
 
                         <div class="mb-3">
-                            <label for="unavailability-end" class="form-label">
+                            <label for="one-off-availability-end" class="form-label">
                                 <?= lang('end') ?>
                                 <span class="text-danger">*</span>
                             </label>
-                            <input id="unavailability-end" class="form-control">
+                            <input id="one-off-availability-end" class="form-control">
                         </div>
 
                         <div class="mb-3" <?= vars('hide_timezone') ? 'style="display: none;"' : '' ?>>
@@ -71,21 +71,20 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="unavailability-notes" class="form-label">
+                            <label for="one-off-availability-notes" class="form-label">
                                 <?= lang('notes') ?>
                             </label>
-                            <textarea id="unavailability-notes" rows="3" class="form-control"></textarea>
+                            <textarea id="one-off-availability-notes" rows="3" class="form-control"></textarea>
                         </div>
 
                     </fieldset>
                 </form>
             </div>
             <div class="modal-footer">
-
                 <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
                     <?= lang('cancel') ?>
                 </button>
-                <button id="save-unavailability" class="btn btn-primary">
+                <button id="save-one-off-availability" class="btn btn-success">
                     <i class="fas fa-check-square me-2"></i>
                     <?= lang('save') ?>
                 </button>
@@ -96,6 +95,6 @@
 
 <?php section('scripts'); ?>
 
-<script src="<?= asset_url('assets/js/components/unavailabilities_modal.js') ?>"></script>
+<script src="<?= asset_url('assets/js/components/one_off_availabilities_modal.js') ?>"></script>
 
-<?php end_section('scripts'); ?> 
+<?php end_section('scripts'); ?>

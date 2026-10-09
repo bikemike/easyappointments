@@ -238,6 +238,37 @@ App.Utils.CalendarEventPopover = (function () {
     }
 
     /**
+     * Build popover content for one-off availability events.
+     *
+     * @param {Object} info - FullCalendar event info.
+     * @param {string} displayEdit - CSS class for edit visibility.
+     * @param {string} displayDelete - CSS class for delete visibility.
+     * @returns {jQuery} Popover content element.
+     */
+    function buildOneOffAvailabilityPopover(info, displayEdit, displayDelete) {
+        const data = info.event.extendedProps.data;
+        const provider = data.provider;
+        let startDateTime = info.event.start;
+        let endDateTime = info.event.end || info.event.start;
+
+        if (data.start_datetime) {
+            startDateTime = new Date(data.start_datetime);
+            endDateTime = new Date(data.end_datetime);
+        }
+        return $('<div/>', {
+            html: [
+                ...createPopoverRow('provider', provider ? (provider.first_name + ' ' + provider.last_name) : '-'),
+                ...createPopoverRow('start', formatDateTime(startDateTime)),
+                ...createPopoverRow('end', formatDateTime(endDateTime)),
+                ...createPopoverRow('notes', getEventNotes(info.event)),
+                renderCustomContent(info),
+                $('<hr/>'),
+                createPopoverButtons(displayEdit, displayDelete),
+            ],
+        });
+    }
+
+    /**
      * Build popover content for working plan exception events.
      *
      * @param {Object} info - FullCalendar event info.
@@ -267,7 +298,7 @@ App.Utils.CalendarEventPopover = (function () {
                 ...createPopoverRow('provider', provider.first_name + ' ' + provider.last_name),
                 ...createPopoverRow('start', formatTimeOrDash(startTime)),
                 ...createPopoverRow('end', formatTimeOrDash(endTime)),
-                ...createPopoverRow('timezone', startTime ? vars('timezones')[provider.timezone] : '-'),
+                ...(vars('hide_timezone') ? [] : createPopoverRow('timezone', startTime ? vars('timezones')[provider.timezone] : '-')),
                 isNonWorking ? $('<p/>', {class: 'mt-2 mb-0 text-muted', text: lang('make_non_working_day')}) : null,
                 renderCustomContent(info),
                 $('<hr/>'),
@@ -300,7 +331,7 @@ App.Utils.CalendarEventPopover = (function () {
             html: [
                 ...createPopoverRow('start', formatDateTime(info.event.start)),
                 ...createPopoverRow('end', formatDateTime(info.event.end)),
-                ...createPopoverRow('timezone', vars('timezones')[provider.timezone]),
+                ...(vars('hide_timezone') ? [] : createPopoverRow('timezone', vars('timezones')[provider.timezone])),
                 ...createPopoverRow('status', data.status || '-'),
                 ...createPopoverRow('service', data.service.name),
                 $('<strong/>', {class: 'd-inline-block me-2', text: lang('provider')}),
@@ -365,6 +396,7 @@ App.Utils.CalendarEventPopover = (function () {
         createPopoverButtons,
         createPopoverRow,
         buildUnavailabilityPopover,
+        buildOneOffAvailabilityPopover,
         buildWorkingPlanExceptionPopover,
         buildAppointmentPopover,
         buildBlockedPeriodPopover,

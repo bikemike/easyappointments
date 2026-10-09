@@ -168,9 +168,13 @@ App.Pages.Booking = (function () {
 
         App.Utils.UI.setDateTimePickerValue($selectDate, new Date());
 
-        const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        const isTimezoneSupported = $selectTimezone.find(`option[value="${browserTimezone}"]`).length > 0;
-        $selectTimezone.val(isTimezoneSupported ? browserTimezone : 'UTC');
+        if (vars('hide_timezone')) {
+            $selectTimezone.val(vars('default_timezone') || 'UTC');
+        } else {
+            const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const isTimezoneSupported = $selectTimezone.find(`option[value="${browserTimezone}"]`).length > 0;
+            $selectTimezone.val(isTimezoneSupported ? browserTimezone : 'UTC');
+        }
 
         // Bind the event handlers (might not be necessary every time we use this class).
         addEventListeners();
@@ -744,10 +748,16 @@ App.Pages.Booking = (function () {
                     <i class="fas fa-clock me-2"></i>
                     ${service.duration} ${lang('minutes')}
                 </div>
+                ${
+                    vars('hide_timezone')
+                        ? ''
+                        : `
                 <div class="mb-2">
                     <i class="fas fa-globe me-2"></i>
                     ${timezoneOptionText}
                 </div> 
+                `
+                }
                 <div class="mb-2" ${!Number(service.price) ? 'hidden' : ''}>
                     <i class="fas fa-cash-register me-2"></i>
                     ${Number(service.price).toFixed(2)} ${service.currency}
@@ -912,7 +922,7 @@ App.Pages.Booking = (function () {
             $address.val(customer.address);
             $city.val(customer.city);
             $zipCode.val(customer.zip_code);
-            if (customer.timezone) {
+            if (!vars('hide_timezone') && customer.timezone) {
                 $selectTimezone.val(customer.timezone);
             }
             const appointmentNotes = appointment.notes !== null ? appointment.notes : '';

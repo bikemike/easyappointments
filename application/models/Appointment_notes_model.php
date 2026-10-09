@@ -101,10 +101,10 @@ class Appointment_notes_model extends EA_Model
      *
      * @param int|null $provider_id
      * @param int $limit
-     * @param int|null $days_back
+     * @param int|null $days_back Default 14 days (2 weeks)
      * @return array
      */
-    public function get_pending_appointments(?int $provider_id = null, int $limit = 10, ?int $days_back = 30): array
+    public function get_pending_appointments(?int $provider_id = null, int $limit = 100, ?int $days_back = 14): array
     {
         $now = date('Y-m-d H:i:s');
 
@@ -135,13 +135,20 @@ class Appointment_notes_model extends EA_Model
         }
         $this->db->where('a.status !=', 'Cancelled');
         $this->db->where('a.is_unavailability', 0);
+        $this->db->group_start()
+            ->where('a.type', 0)
+            ->or_where('a.type IS NULL', null, false)
+            ->group_end();
 
         if ($provider_id) {
             $this->db->where('a.id_users_provider', $provider_id);
         }
 
-        $this->db->order_by('a.end_datetime', 'DESC');
-        $this->db->limit($limit);
+        // Show oldest first so practitioner works chronologically
+        $this->db->order_by('a.start_datetime', 'ASC');
+        if ($limit > 0) {
+            $this->db->limit($limit);
+        }
 
         return $this->db->get()->result_array();
     }

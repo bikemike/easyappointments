@@ -181,12 +181,32 @@ class Appointments_model extends EA_Model
         ?int $offset = null,
         ?string $order_by = null,
     ): array {
+        $has_type_filter = false;
+        $has_status_filter = false;
+        $has_id_filter = false;
+
         if ($where !== null) {
             $this->db->where($where);
+            if (is_array($where)) {
+                $has_type_filter = isset($where['type']) || isset($where['appointments.type']);
+                $has_status_filter = isset($where['status']) || isset($where['appointments.status']);
+                $has_id_filter = isset($where['id']) || isset($where['appointments.id']) || isset($where['hash']) || isset($where['appointments.hash']);
+            }
+        }
+
+        // By default, only return active booked appointments (type 0, not cancelled, not one-off availability)
+        if (!$has_type_filter && !$has_status_filter && !$has_id_filter) {
+            $this->db->group_start()
+                ->where('type', 0)
+                ->or_where('type IS NULL', null, false)
+                ->group_end();
+            $this->db->where('status !=', 'Cancelled');
         }
 
         if ($order_by) {
             $this->db->order_by($this->quote_order_by($order_by));
+        } else {
+            $this->db->order_by('start_datetime', 'ASC');
         }
 
         $appointments = $this->db
@@ -347,7 +367,6 @@ class Appointments_model extends EA_Model
     }
 
     /**
-    /**
      * Remove or soft-delete an existing appointment from the database.
      *
      * @param int $appointment_id Appointment ID.
@@ -356,18 +375,29 @@ class Appointments_model extends EA_Model
      *
      * @throws RuntimeException
      */
-    public function delete(int $appointment_id, bool $soft_delete = true, string $notes = ''): void
-    {
+    public function delete(
+        int $appointment_id,
+        bool $soft_delete = true,
+        string $notes = '',
+        bool $admin_delete = true,
+    ): void {
         $appointment = $this->find($appointment_id);
 
         if (!$appointment) {
             return;
         }
 
-        if ($soft_delete && empty($appointment['is_unavailability'])) {
+        // Unavailabilities (type 1) and One-off availabilities (type 2) are hard-deleted
+        $type = (int) ($appointment['type'] ?? 0);
+        if (!empty($appointment['is_unavailability']) || $type === 1 || $type === 2) {
+            $this->db->delete('appointments', ['id' => $appointment_id]);
+            return;
+        }
+
+        if ($soft_delete) {
             $update_data = [
                 'status' => 'Cancelled',
-                'type' => 3,
+                'type' => $admin_delete ? 3 : 4,
             ];
 
             if (!empty($notes)) {
@@ -382,6 +412,24 @@ class Appointments_model extends EA_Model
         }
 
         $this->db->delete('appointments', ['id' => $appointment_id]);
+    }
+
+    /**
+     * Get one-off availabilities.
+     *
+     * @param array|string|null $where Where conditions.
+     *
+     * @return array Returns an array of one-off availability records.
+     */
+    public function get_one_off_availabilities(array|string|null $where = null): array
+    {
+        if ($where !== null) {
+            $this->db->where($where);
+        }
+
+        return $this->db
+            ->get_where('appointments', ['type' => 2])
+            ->result_array();
     }
 
     /**
@@ -503,6 +551,11 @@ class Appointments_model extends EA_Model
             ->join('users AS customers', 'customers.id = appointments.id_users_customer', 'left')
             ->where('is_unavailability', false)
             ->group_start()
+            ->where('appointments.type', 0)
+            ->or_where('appointments.type IS NULL', null, false)
+            ->group_end()
+            ->where('appointments.status !=', 'Cancelled')
+            ->group_start()
             ->like('appointments.start_datetime', $keyword)
             ->or_like('appointments.end_datetime', $keyword)
             ->or_like('appointments.location', $keyword)
@@ -550,6 +603,11 @@ class Appointments_model extends EA_Model
             ->from('appointments')
             ->join('services', 'services.id = appointments.id_services', 'left')
             ->where('is_unavailability', false)
+            ->group_start()
+            ->where('appointments.type', 0)
+            ->or_where('appointments.type IS NULL', null, false)
+            ->group_end()
+            ->where('appointments.status !=', 'Cancelled')
             ->order_by('start_datetime', 'DESC')
             ->get()
             ->result_array();

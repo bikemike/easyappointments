@@ -121,12 +121,12 @@
 <div class="print-container">
     <!-- Action Controls (Hidden on Print) -->
     <div class="no-print d-flex justify-content-between align-items-center mb-4">
-        <a href="javascript:window.history.back()" class="btn btn-outline-secondary">
-            &larr; Back
-        </a>
+        <button type="button" onclick="if (window.opener || window.history.length <= 1) { window.close(); } else { window.history.back(); }" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Close / Back
+        </button>
         <div>
             <button onclick="window.print()" class="btn btn-primary">
-                Print Summary
+                <i class="fas fa-print me-1"></i> Print Summary
             </button>
         </div>
     </div>

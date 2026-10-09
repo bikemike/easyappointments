@@ -160,7 +160,7 @@
                                     <input id="end-datetime" class="required form-control">
                                 </div>
 
-                                <div class="mb-3">
+                                <div class="mb-3" <?= vars('hide_timezone') ? 'style="display: none;"' : '' ?>>
                                     <label class="form-label">
                                         <?= lang('timezone') ?>
                                     </label>
@@ -332,7 +332,7 @@
                                            maxlength="120"/>
                                 </div>
 
-                                <div class="mb-3">
+                                <div class="mb-3" <?= vars('hide_timezone') ? 'style="display: none;"' : '' ?>>
                                     <label class="form-label" for="timezone">
                                         <?= lang('timezone') ?>
                                         <span class="text-danger" hidden>*</span>

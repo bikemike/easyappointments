@@ -143,7 +143,7 @@ App.Pages.Calendar = (function () {
             return;
         }
 
-        App.Http.AppointmentNotes.getPending(5, 30).done((response) => {
+        App.Http.AppointmentNotes.getPending(100, 14).done((response) => {
             if (!response.pending || response.pending.length === 0) {
                 return;
             }
@@ -171,10 +171,10 @@ App.Pages.Calendar = (function () {
             $('#calendar-toolbar').after($banner);
 
             $banner.on('click', '#btn-review-pending-notes', () => {
-                const firstApt = response.pending[0];
-                App.Components.AppointmentNotesModal.open(firstApt, () => {
+                App.Components.AppointmentNotesModal.openQueue(response.pending, 0, () => {
                     $('#pending-notes-alert').remove();
                     checkPendingSessionNotes();
+                    $('#reload-appointments').trigger('click');
                 });
             });
         });

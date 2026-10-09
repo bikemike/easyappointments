@@ -461,15 +461,16 @@ $customer_address = trim((string) ($customer['address'] ?? ''));
 
                                                 </td>
                                             </tr>
-                                            <tr>
-                                                <td class="label" style="padding: 3px;font-weight: bold;">
-                                                    <?= lang('timezone') ?>
-                                                </td>
-                                                <td style="padding: 3px;">
-                                                    <?= format_timezone($timezone) ?>
-                                                </td>
-                                            </tr>
-
+                                            <?php if (!setting('hide_timezone', 1)): ?>
+                                                <tr>
+                                                    <td class="label" style="padding: 3px;font-weight: bold;">
+                                                        <?= lang('timezone') ?>
+                                                    </td>
+                                                    <td style="padding: 3px;">
+                                                        <?= format_timezone($timezone) ?>
+                                                    </td>
+                                                </tr>
+                                            <?php endif; ?>
                                             <?php if (!empty($appointment['status'])): ?>
                                                 <tr>
                                                     <td class="label" style="padding: 3px;font-weight: bold;">

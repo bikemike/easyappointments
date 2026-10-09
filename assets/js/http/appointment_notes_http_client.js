@@ -56,15 +56,15 @@ App.Http.AppointmentNotes = (function () {
     /**
      * Get pending appointments needing notes.
      *
-     * @param {number} [limit=10]
-     * @param {number} [daysBack=30]
+     * @param {number} [limit=100]
+     * @param {number} [daysBack=14]
      * @returns {Promise}
      */
     function getPending(limit, daysBack) {
         const url = App.Utils.Url.siteUrl('appointment_notes/pending');
         const data = {
-            limit: limit || 10,
-            days_back: daysBack || 30,
+            limit: limit || 100,
+            days_back: daysBack || 14,
         };
         return $.get(url, data);
     }

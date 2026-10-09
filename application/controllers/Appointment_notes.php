@@ -59,7 +59,11 @@ class Appointment_notes extends EA_Controller
             check('appointment_id', 'numeric');
 
             $appointment_id = (int) request('appointment_id');
-            $notes = request('notes', '');
+            $notes = trim((string) request('notes', ''));
+
+            if ($notes === '') {
+                throw new InvalidArgumentException(lang('notes_cannot_be_empty') ?? 'Session notes cannot be empty.');
+            }
 
             $appointment = $this->appointments_model->find($appointment_id);
 
@@ -187,8 +191,8 @@ class Appointment_notes extends EA_Controller
             $role_slug = session('role_slug');
             $provider_id = ($role_slug === DB_SLUG_PROVIDER) ? $user_id : null;
 
-            $limit = (int) request('limit', 10);
-            $days_back = (int) request('days_back', 30);
+            $limit = (int) request('limit', 100);
+            $days_back = (int) request('days_back', 14);
 
             $pending = $this->appointment_notes_model->get_pending_appointments($provider_id, $limit, $days_back);
 
