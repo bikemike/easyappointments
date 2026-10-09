@@ -120,20 +120,68 @@ class Availability
             $date_working_plan = $working_plan_exceptions[$date];
         }
 
-        if (!$date_working_plan) {
+        $one_off_availabilities = $this->CI->appointments_model->get_one_off_availabilities([
+            'id_users_provider' => $provider['id'],
+            'DATE(start_datetime) <=' => $date,
+            'DATE(end_datetime) >=' => $date,
+        ]);
+
+        if (!$date_working_plan && empty($one_off_availabilities)) {
             return [];
         }
 
-        $periods = [
-            [
+        $periods = [];
+        if ($date_working_plan) {
+            $periods[] = [
                 'start' => new DateTime($date . ' ' . $date_working_plan['start']),
                 'end' => new DateTime($date . ' ' . $date_working_plan['end']),
-            ],
-        ];
+            ];
+            $periods = $this->remove_breaks($date, $periods, $date_working_plan['breaks'] ?? []);
+        }
+
+        foreach ($one_off_availabilities as $one_off) {
+            $s = new DateTime($one_off['start_datetime']);
+            $e = new DateTime($one_off['end_datetime']);
+            $day_start = new DateTime($date . ' 00:00:00');
+            $day_end = new DateTime($date . ' 23:59:59');
+            if ($s < $day_start) {
+                $s = $day_start;
+            }
+            if ($e > $day_end) {
+                $e = $day_end;
+            }
+            if ($s < $e) {
+                $periods[] = [
+                    'start' => $s,
+                    'end' => $e,
+                ];
+            }
+        }
+
+        // Merge overlapping/contiguous periods
+        usort($periods, function ($a, $b) {
+            return $a['start'] <=> $b['start'];
+        });
+
+        $merged_periods = [];
+        foreach ($periods as $period) {
+            if (empty($merged_periods)) {
+                $merged_periods[] = $period;
+                continue;
+            }
+            $last_index = count($merged_periods) - 1;
+            if ($merged_periods[$last_index]['end'] >= $period['start']) {
+                if ($period['end'] > $merged_periods[$last_index]['end']) {
+                    $merged_periods[$last_index]['end'] = $period['end'];
+                }
+            } else {
+                $merged_periods[] = $period;
+            }
+        }
+        $periods = $merged_periods;
 
         $blocked_periods = $this->CI->blocked_periods_model->get_for_period($date, $date);
 
-        $periods = $this->remove_breaks($date, $periods, $date_working_plan['breaks']);
         $periods = $this->remove_unavailability_events($periods, $unavailability_events);
         $periods = $this->remove_unavailability_events($periods, $blocked_periods);
 
@@ -368,6 +416,9 @@ class Availability
             ),
         );
 
+        // Fetch one-off availabilities (type = 2) for this provider and date
+        $one_off_availabilities = $this->CI->appointments_model->get_one_off_availabilities($where);
+
         // Find the empty spaces on the plan. The first split between the plan is due to a break (if any). After that
         // every reserved appointment is considered to be a taken space in the plan.
         $working_day = strtolower(date('l', strtotime($date)));
@@ -379,13 +430,13 @@ class Availability
             $date_working_plan = $working_plan_exceptions[$date];
         }
 
-        if (!$date_working_plan) {
+        if (!$date_working_plan && empty($one_off_availabilities)) {
             return [];
         }
 
         $periods = [];
 
-        if (isset($date_working_plan['breaks'])) {
+        if ($date_working_plan && isset($date_working_plan['breaks'])) {
             $periods[] = [
                 'start' => $date_working_plan['start'],
                 'end' => $date_working_plan['end'],
@@ -444,7 +495,54 @@ class Availability
                     }
                 }
             }
+        } elseif ($date_working_plan) {
+            $periods[] = [
+                'start' => $date_working_plan['start'],
+                'end' => $date_working_plan['end'],
+            ];
         }
+
+        // Add one-off availabilities into $periods
+        foreach ($one_off_availabilities as $one_off) {
+            $s = new DateTime($one_off['start_datetime']);
+            $e = new DateTime($one_off['end_datetime']);
+            $day_start = new DateTime($date . ' 00:00:00');
+            $day_end = new DateTime($date . ' 23:59:59');
+            if ($s < $day_start) {
+                $s = $day_start;
+            }
+            if ($e > $day_end) {
+                $e = $day_end;
+            }
+            if ($s < $e) {
+                $periods[] = [
+                    'start' => $s->format('H:i'),
+                    'end' => $e->format('H:i'),
+                ];
+            }
+        }
+
+        // Merge overlapping/contiguous periods
+        usort($periods, function ($a, $b) {
+            return strcmp($a['start'], $b['start']);
+        });
+
+        $merged_periods = [];
+        foreach ($periods as $period) {
+            if (empty($merged_periods)) {
+                $merged_periods[] = $period;
+                continue;
+            }
+            $last_index = count($merged_periods) - 1;
+            if ($merged_periods[$last_index]['end'] >= $period['start']) {
+                if ($period['end'] > $merged_periods[$last_index]['end']) {
+                    $merged_periods[$last_index]['end'] = $period['end'];
+                }
+            } else {
+                $merged_periods[] = $period;
+            }
+        }
+        $periods = $merged_periods;
 
         // Break the empty periods with the reserved appointments.
         foreach ($appointments as $appointment) {

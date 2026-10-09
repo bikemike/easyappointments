@@ -577,6 +577,86 @@ class Calendar extends EA_Controller
     }
 
     /**
+     * Insert or update one-off availability in database.
+     */
+    public function save_one_off_availability(): void
+    {
+        try {
+            method('post');
+
+            check('one_off_availability', 'array');
+
+            $one_off = request('one_off_availability');
+
+            $required_permissions = !isset($one_off['id'])
+                ? can('add', PRIV_APPOINTMENTS)
+                : can('edit', PRIV_APPOINTMENTS);
+
+            if (!$required_permissions) {
+                throw new RuntimeException('You do not have the required permissions for this task.');
+            }
+
+            $provider_id = (int) $one_off['id_users_provider'];
+
+            $this->check_event_permissions($provider_id);
+
+            $data = [
+                'type' => 2,
+                'is_unavailability' => 0,
+                'start_datetime' => $one_off['start_datetime'],
+                'end_datetime' => $one_off['end_datetime'],
+                'notes' => $one_off['notes'] ?? '',
+                'id_users_provider' => $provider_id,
+            ];
+
+            if (!empty($one_off['id'])) {
+                $id = (int) $one_off['id'];
+                $this->db->update('appointments', $data, ['id' => $id]);
+            } else {
+                $this->db->insert('appointments', $data);
+                $id = (int) $this->db->insert_id();
+            }
+
+            json_response([
+                'success' => true,
+                'id' => $id,
+            ]);
+        } catch (Throwable $e) {
+            json_exception($e);
+        }
+    }
+
+    /**
+     * Delete a one-off availability from database.
+     */
+    public function delete_one_off_availability(): void
+    {
+        method('post');
+        try {
+            if (cannot('delete', PRIV_APPOINTMENTS)) {
+                throw new RuntimeException('You do not have the required permissions for this task.');
+            }
+
+            check('appointment_id', 'numeric');
+
+            $appointment_id = (int) request('appointment_id');
+
+            $appointment = $this->appointments_model->find($appointment_id);
+
+            if ($appointment) {
+                $this->check_event_permissions((int) $appointment['id_users_provider']);
+                $this->appointments_model->delete($appointment_id, false);
+            }
+
+            json_response([
+                'success' => true,
+            ]);
+        } catch (Throwable $e) {
+            json_exception($e);
+        }
+    }
+
+    /**
      * Insert or update working plan exceptions to database.
      */
     public function save_working_plan_exception(): void
@@ -668,6 +748,10 @@ class Calendar extends EA_Controller
                     'start_datetime >=' => $start_date,
                     'end_datetime <=' => $end_date,
                 ]),
+                'one_off_availabilities' => $this->appointments_model->get_one_off_availabilities([
+                    'start_datetime >=' => $start_date,
+                    'end_datetime <=' => $end_date,
+                ]),
             ];
 
             foreach ($response['appointments'] as &$appointment) {
@@ -699,6 +783,16 @@ class Calendar extends EA_Controller
                 }
 
                 $response['unavailabilities'] = array_values($response['unavailabilities']);
+
+                foreach ($response['one_off_availabilities'] as $index => $one_off) {
+                    if ((int) $one_off['id_users_provider'] !== (int) $user_id) {
+                        unset($response['one_off_availabilities'][$index]);
+                    }
+                }
+
+                unset($one_off);
+
+                $response['one_off_availabilities'] = array_values($response['one_off_availabilities']);
             }
 
             // If the current user is a secretary he must only see the appointments of his providers.
@@ -720,6 +814,16 @@ class Calendar extends EA_Controller
                 }
 
                 $response['unavailabilities'] = array_values($response['unavailabilities']);
+
+                foreach ($response['one_off_availabilities'] as $index => $one_off) {
+                    if (!in_array((int) $one_off['id_users_provider'], $providers)) {
+                        unset($response['one_off_availabilities'][$index]);
+                    }
+                }
+
+                unset($one_off);
+
+                $response['one_off_availabilities'] = array_values($response['one_off_availabilities']);
             }
 
             foreach ($response['unavailabilities'] as &$unavailability) {
@@ -727,6 +831,12 @@ class Calendar extends EA_Controller
             }
 
             unset($unavailability);
+
+            foreach ($response['one_off_availabilities'] as &$one_off) {
+                $one_off['provider'] = $this->providers_model->find($one_off['id_users_provider']);
+            }
+
+            unset($one_off);
 
             // Add blocked periods to the response.
             $start_date = request('start_date');
@@ -863,6 +973,33 @@ class Calendar extends EA_Controller
                 $this->db->where('is_unavailability', 1);
 
                 $response['unavailabilities'] = $this->db->get()->result_array();
+
+                // Get one-off availability periods (type = 2)
+                $this->db->select('*');
+                $this->db->from('appointments');
+
+                if (!$is_all) {
+                    $this->db->where($where_id, $record_id);
+                }
+
+                $this->db->group_start();
+                $this->db->group_start();
+                $this->db->where('start_datetime >', $start_date);
+                $this->db->where('start_datetime <', $end_date);
+                $this->db->group_end();
+                $this->db->or_group_start();
+                $this->db->where('end_datetime >', $start_date);
+                $this->db->where('end_datetime <', $end_date);
+                $this->db->group_end();
+                $this->db->or_group_start();
+                $this->db->where('start_datetime <=', $start_date);
+                $this->db->where('end_datetime >=', $end_date);
+                $this->db->group_end();
+                $this->db->group_end();
+
+                $this->db->where('type', 2);
+
+                $response['one_off_availabilities'] = $this->db->get()->result_array();
             }
 
             $user_id = session('user_id');
@@ -888,6 +1025,16 @@ class Calendar extends EA_Controller
                 unset($unavailability);
 
                 $response['unavailabilities'] = array_values($response['unavailabilities']);
+
+                foreach ($response['one_off_availabilities'] as $index => $one_off) {
+                    if ((int) $one_off['id_users_provider'] !== (int) $user_id) {
+                        unset($response['one_off_availabilities'][$index]);
+                    }
+                }
+
+                unset($one_off);
+
+                $response['one_off_availabilities'] = array_values($response['one_off_availabilities']);
             }
 
             // If the current user is a secretary he must only see the appointments of his providers.
@@ -909,6 +1056,16 @@ class Calendar extends EA_Controller
                 }
 
                 $response['unavailabilities'] = array_values($response['unavailabilities']);
+
+                foreach ($response['one_off_availabilities'] as $index => $one_off) {
+                    if (!in_array((int) $one_off['id_users_provider'], $providers)) {
+                        unset($response['one_off_availabilities'][$index]);
+                    }
+                }
+
+                unset($one_off);
+
+                $response['one_off_availabilities'] = array_values($response['one_off_availabilities']);
             }
 
             foreach ($response['unavailabilities'] as &$unavailability) {
@@ -916,6 +1073,12 @@ class Calendar extends EA_Controller
             }
 
             unset($unavailability);
+
+            foreach ($response['one_off_availabilities'] as &$one_off) {
+                $one_off['provider'] = $this->providers_model->find($one_off['id_users_provider']);
+            }
+
+            unset($one_off);
 
             // Add blocked periods to the response.
             $start_date = request('start_date');

@@ -136,6 +136,54 @@ App.Http.Calendar = (function () {
     }
 
     /**
+     * Save one-off availability period to database.
+     *
+     * @param {Object} oneOffAvailability Contains the one-off availability period data.
+     * @param {Function} [successCallback] The ajax success callback function.
+     * @param {Function} [errorCallback] The ajax failure callback function.
+     *
+     * @return {*|jQuery}
+     */
+    function saveOneOffAvailability(oneOffAvailability, successCallback, errorCallback) {
+        const url = App.Utils.Url.siteUrl('calendar/save_one_off_availability');
+
+        const data = {
+            csrf_token: vars('csrf_token'),
+            one_off_availability: oneOffAvailability,
+        };
+
+        return $.post(url, data)
+            .done((response) => {
+                if (successCallback) {
+                    successCallback(response);
+                }
+            })
+            .fail(() => {
+                if (errorCallback) {
+                    errorCallback();
+                }
+            });
+    }
+
+    /**
+     * Remove a one-off availability.
+     *
+     * @param {Number} appointmentId
+     *
+     * @return {*|jQuery}
+     */
+    function deleteOneOffAvailability(appointmentId) {
+        const url = App.Utils.Url.siteUrl('calendar/delete_one_off_availability');
+
+        const data = {
+            csrf_token: vars('csrf_token'),
+            appointment_id: appointmentId,
+        };
+
+        return $.post(url, data);
+    }
+
+    /**
      * Save working plan exception of work to database.
      *
      * @param {Date} date Contains the working plan exceptions data.
@@ -309,6 +357,8 @@ App.Http.Calendar = (function () {
         deleteAppointment,
         saveUnavailability,
         deleteUnavailability,
+        saveOneOffAvailability,
+        deleteOneOffAvailability,
         saveWorkingPlanException,
         deleteWorkingPlanException,
         getCalendarAppointments,
