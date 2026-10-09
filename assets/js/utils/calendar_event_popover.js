@@ -215,6 +215,37 @@ App.Utils.CalendarEventPopover = (function () {
     }
 
     /**
+     * Build popover content for one-off availability events.
+     *
+     * @param {Object} info - FullCalendar event info.
+     * @param {string} displayEdit - CSS class for edit visibility.
+     * @param {string} displayDelete - CSS class for delete visibility.
+     * @returns {jQuery} Popover content element.
+     */
+    function buildOneOffAvailabilityPopover(info, displayEdit, displayDelete) {
+        const data = info.event.extendedProps.data;
+        const provider = data.provider;
+        let startDateTime = info.event.start;
+        let endDateTime = info.event.end || info.event.start;
+
+        if (data.start_datetime) {
+            startDateTime = new Date(data.start_datetime);
+            endDateTime = new Date(data.end_datetime);
+        }
+        return $('<div/>', {
+            html: [
+                ...createPopoverRow('provider', provider ? (provider.first_name + ' ' + provider.last_name) : '-'),
+                ...createPopoverRow('start', formatDateTime(startDateTime)),
+                ...createPopoverRow('end', formatDateTime(endDateTime)),
+                ...createPopoverRow('notes', getEventNotes(info.event)),
+                renderCustomContent(info),
+                $('<hr/>'),
+                createPopoverButtons(displayEdit, displayDelete),
+            ],
+        });
+    }
+
+    /**
      * Build popover content for working plan exception events.
      *
      * @param {Object} info - FullCalendar event info.
@@ -342,6 +373,7 @@ App.Utils.CalendarEventPopover = (function () {
         createPopoverButtons,
         createPopoverRow,
         buildUnavailabilityPopover,
+        buildOneOffAvailabilityPopover,
         buildWorkingPlanExceptionPopover,
         buildAppointmentPopover,
         buildBlockedPeriodPopover,

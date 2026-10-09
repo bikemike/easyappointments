@@ -19,6 +19,7 @@ App.Utils.CalendarTableView = (function () {
 
     const EVENT_COLORS = {
         unavailability: '#879DB4',
+        oneOffAvailability: '#28a745',
         blockedPeriod: '#d65069',
         notWorking: '#BEBEBE',
         workingPlanException: '#879DB4',
@@ -87,6 +88,16 @@ App.Utils.CalendarTableView = (function () {
      */
     function isUnavailability(eventData) {
         return Boolean(Number(eventData?.is_unavailability));
+    }
+
+    /**
+     * Check if the event is a one-off availability.
+     *
+     * @param {Object} eventData - Event data object.
+     * @returns {boolean}
+     */
+    function isOneOffAvailability(eventData) {
+        return Number(eventData?.type) === 2;
     }
 
     /**
@@ -412,6 +423,14 @@ App.Utils.CalendarTableView = (function () {
 
         if (isWorkingPlanException(data)) {
             handleEditWorkingPlanException(data);
+        } else if (isOneOffAvailability(data)) {
+            const oneOff = {
+                ...data,
+                start_datetime: moment(lastFocusedEventData.start).format('YYYY-MM-DD HH:mm:ss'),
+                end_datetime: moment(lastFocusedEventData.end).format('YYYY-MM-DD HH:mm:ss'),
+            };
+
+            App.Components.OneOffAvailabilitiesModal.populateModal(oneOff);
         } else if (!isUnavailability(data)) {
             populateAppointmentModal(data);
         } else {
@@ -436,6 +455,10 @@ App.Utils.CalendarTableView = (function () {
             // Working plan exception
 
             handleDeleteWorkingPlanException(data);
+        } else if (isOneOffAvailability(data)) {
+            App.Http.Calendar.deleteOneOffAvailability(data.id).done(() => {
+                $reloadAppointments.trigger('click');
+            });
         } else if (!isUnavailability(data)) {
             handleDeleteAppointment(data.id);
         } else {
@@ -468,6 +491,12 @@ App.Utils.CalendarTableView = (function () {
             displayEdit = $target.hasClass('fc-custom') && vars('privileges').appointments.edit ? '' : 'd-none';
             displayDelete = $target.hasClass('fc-custom') && vars('privileges').appointments.delete ? 'me-2' : 'd-none';
             $html = App.Utils.CalendarEventPopover.buildWorkingPlanExceptionPopover(info, displayEdit, displayDelete);
+        } else if ($target.hasClass('fc-one-off-availability')) {
+            const isCustom = $target.hasClass('fc-custom');
+
+            displayEdit = isCustom && vars('privileges').appointments.edit ? '' : 'd-none';
+            displayDelete = isCustom && vars('privileges').appointments.delete ? 'me-2' : 'd-none';
+            $html = App.Utils.CalendarEventPopover.buildOneOffAvailabilityPopover(info, displayEdit, displayDelete);
         } else if ($target.hasClass('fc-unavailability')) {
             const isCustom = $target.hasClass('fc-custom');
 
@@ -519,7 +548,9 @@ App.Utils.CalendarTableView = (function () {
 
         const eventData = info.event.extendedProps.data;
 
-        if (!isUnavailability(eventData)) {
+        if (isOneOffAvailability(eventData)) {
+            handleOneOffAvailabilityResize(info, eventData);
+        } else if (!isUnavailability(eventData)) {
             handleAppointmentResize(info, eventData);
         } else {
             handleUnavailabilityResize(info, eventData);
@@ -599,6 +630,43 @@ App.Utils.CalendarTableView = (function () {
     }
 
     /**
+     * Handle one-off availability resize operation.
+     *
+     * @param {Object} info - FullCalendar resize info.
+     * @param {Object} eventData - Event data.
+     */
+    function handleOneOffAvailabilityResize(info, eventData) {
+        const oneOff = {
+            id: eventData.id,
+            start_datetime: moment(info.event.start).format('YYYY-MM-DD HH:mm:ss'),
+            end_datetime: moment(info.event.end).format('YYYY-MM-DD HH:mm:ss'),
+            id_users_provider: eventData.id_users_provider,
+        };
+
+        eventData.end_datetime = oneOff.end_datetime;
+
+        const successCallback = () => {
+            const undoFunction = () => {
+                oneOff.end_datetime = eventData.end_datetime = moment(oneOff.end_datetime)
+                    .add({days: -info.endDelta.days, milliseconds: -info.endDelta.milliseconds})
+                    .format('YYYY-MM-DD HH:mm:ss');
+
+                App.Http.Calendar.saveOneOffAvailability(oneOff).done(() => $notification.hide('blind'));
+                info.revert();
+            };
+
+            App.Layouts.Backend.displayNotification(lang('one_off_availability_updated'), [
+                {label: lang('undo'), function: undoFunction},
+            ]);
+
+            $footer.css('position', 'static');
+
+            info.event.setProp('data', eventData);
+        };
+        App.Http.Calendar.saveOneOffAvailability(oneOff, successCallback, null);
+    }
+
+    /**
      * Handle calendar event drop (drag and drop).
      *
      * @param {Object} info - FullCalendar event info.
@@ -616,7 +684,9 @@ App.Utils.CalendarTableView = (function () {
 
         const eventData = info.event.extendedProps.data;
 
-        if (!isUnavailability(eventData)) {
+        if (isOneOffAvailability(eventData)) {
+            handleOneOffAvailabilityDrop(info, eventData);
+        } else if (!isUnavailability(eventData)) {
             handleAppointmentDrop(info, eventData);
         } else {
             handleUnavailabilityDrop(info, eventData);
@@ -700,6 +770,43 @@ App.Utils.CalendarTableView = (function () {
             $footer.css('position', 'static');
         };
         App.Http.Calendar.saveUnavailability(unavailability, successCallback);
+    }
+
+    /**
+     * Handle one-off availability drop operation.
+     *
+     * @param {Object} info - FullCalendar drop info.
+     * @param {Object} eventData - Event data.
+     */
+    function handleOneOffAvailabilityDrop(info, eventData) {
+        const oneOff = {
+            id: eventData.id,
+            start_datetime: moment(info.event.start).format('YYYY-MM-DD HH:mm:ss'),
+            end_datetime: moment(info.event.end).format('YYYY-MM-DD HH:mm:ss'),
+            id_users_provider: eventData.id_users_provider,
+        };
+
+        const successCallback = () => {
+            const undoFunction = () => {
+                const delta = {days: -info.delta.days, milliseconds: -info.delta.milliseconds};
+
+                oneOff.start_datetime = moment(oneOff.start_datetime)
+                    .add(delta)
+                    .format('YYYY-MM-DD HH:mm:ss');
+                oneOff.end_datetime = moment(oneOff.end_datetime)
+                    .add(delta)
+                    .format('YYYY-MM-DD HH:mm:ss');
+                eventData.start_datetime = oneOff.start_datetime;
+                eventData.end_datetime = oneOff.end_datetime;
+                App.Http.Calendar.saveOneOffAvailability(oneOff).done(() => $notification.hide('blind'));
+                info.revert();
+            };
+            App.Layouts.Backend.displayNotification(lang('one_off_availability_updated'), [
+                {label: lang('undo'), function: undoFunction},
+            ]);
+            $footer.css('position', 'static');
+        };
+        App.Http.Calendar.saveOneOffAvailability(oneOff, successCallback);
     }
 
     /**
@@ -943,6 +1050,44 @@ App.Utils.CalendarTableView = (function () {
             className: 'fc-blocked-period fc-unavailability',
             data: blockedPeriod,
         }));
+
+        $providerColumn.find('.calendar-wrapper').data('fullCalendar').addEventSource(calendarEvents);
+    }
+
+    /**
+     * Create one-off availability calendar events.
+     *
+     * @param {jQuery} $providerColumn - Provider column element.
+     * @param {Array} oneOffAvailabilities - One-off availability data array.
+     */
+    function createOneOffAvailabilities($providerColumn, oneOffAvailabilities) {
+        if (!oneOffAvailabilities || !oneOffAvailabilities.length) {
+            return;
+        }
+
+        const providerId = $providerColumn.data('provider').id;
+
+        const calendarEvents = oneOffAvailabilities
+            .filter((o) => Number(o.id_users_provider) === Number(providerId))
+            .map((oneOff) => {
+                let notes = oneOff.notes ? ' - ' + oneOff.notes : '';
+
+                if (notes.length > 33) {
+                    notes = ' - ' + oneOff.notes.substring(0, 30) + '...';
+                }
+
+                return {
+                    title: lang('one_off_availability') + notes,
+                    start: moment(oneOff.start_datetime).toDate(),
+                    end: moment(oneOff.end_datetime).toDate(),
+                    allDay: false,
+                    color: EVENT_COLORS.oneOffAvailability,
+                    display: 'block',
+                    editable: true,
+                    className: 'fc-one-off-availability fc-custom',
+                    data: oneOff,
+                };
+            });
 
         $providerColumn.find('.calendar-wrapper').data('fullCalendar').addEventSource(calendarEvents);
     }
@@ -1417,6 +1562,7 @@ App.Utils.CalendarTableView = (function () {
         createNonWorkingHours($providerColumn.find('.calendar-wrapper'), provider);
         createAppointments($providerColumn, events.appointments);
         createUnavailabilities($providerColumn, events.unavailabilities);
+        createOneOffAvailabilities($providerColumn, events.one_off_availabilities || []);
         createBlockedPeriods($providerColumn, events.blocked_periods);
     }
 
@@ -1589,6 +1735,7 @@ App.Utils.CalendarTableView = (function () {
                             createNonWorkingHours($providerColumn.find('.calendar-wrapper'), provider);
                             createAppointments($providerColumn, response.appointments);
                             createUnavailabilities($providerColumn, response.unavailabilities);
+                            createOneOffAvailabilities($providerColumn, response.one_off_availabilities || []);
                             createBlockedPeriods($providerColumn, response.blocked_periods);
 
                             // Add provider breaks

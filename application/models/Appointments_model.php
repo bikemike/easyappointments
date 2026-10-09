@@ -359,6 +359,24 @@ class Appointments_model extends EA_Model
     }
 
     /**
+     * Get one-off availabilities.
+     *
+     * @param array|string|null $where Where conditions.
+     *
+     * @return array Returns an array of one-off availability records.
+     */
+    public function get_one_off_availabilities(array|string|null $where = null): array
+    {
+        if ($where !== null) {
+            $this->db->where($where);
+        }
+
+        return $this->db
+            ->get_where('appointments', ['type' => 2])
+            ->result_array();
+    }
+
+    /**
      * Get the attendants number for the requested period.
      *
      * @param DateTime $start Period start.
