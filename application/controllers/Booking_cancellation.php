@@ -114,7 +114,8 @@ class Booking_cancellation extends EA_Controller
                 'time_format' => setting('time_format'),
             ];
 
-            $this->appointments_model->delete($appointment['id']);
+            // Soft-delete appointment with customer cancellation reason (type 4 = user cancel).
+            $this->appointments_model->delete($appointment['id'], true, $cancellation_reason, false);
 
             $this->synchronization->sync_appointment_deleted($appointment, $provider);
 
