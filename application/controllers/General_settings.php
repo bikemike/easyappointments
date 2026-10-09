@@ -92,6 +92,7 @@ class General_settings extends EA_Controller
         'company_working_plan',
         'book_advance_timeout',
         'default_timezone',
+        'hide_timezone',
         'default_language',
         'theme',
         'date_format',
