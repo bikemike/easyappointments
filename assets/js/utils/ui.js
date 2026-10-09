@@ -27,9 +27,8 @@ window.App.Utils.UI = (function () {
             case 'MDY':
                 return 'm/d/Y';
             case 'YMD':
-                return 'Y/m/d';
             default:
-                throw new Error('Invalid date format value.');
+                return 'Y/m/d';
         }
     }
 
@@ -40,12 +39,13 @@ window.App.Utils.UI = (function () {
      */
     function getTimeFormat() {
         switch (vars('time_format')) {
-            case 'regular':
-                return 'h:i K';
             case 'military':
+            case '24':
                 return 'H:i';
+            case 'regular':
+            case '12':
             default:
-                throw new Error('Invalid date format value.');
+                return 'h:i K';
         }
     }
 
