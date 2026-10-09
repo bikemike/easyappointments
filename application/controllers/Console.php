@@ -173,6 +173,67 @@ class Console extends EA_Controller
     }
 
     /**
+     * Send a test email via CLI to verify mail server connectivity.
+     * Ported from legacy cli.php logic.
+     *
+     * Usage:
+     * php index.php cli send_test_email [to_address]
+     * php index.php console send_test_email [to_address]
+     *
+     * @param string|null $to_address
+     */
+    public function send_test_email(?string $to_address = null): void
+    {
+        $recipient = !empty($to_address) ? $to_address : setting('company_email');
+
+        if (empty($recipient)) {
+            response(PHP_EOL . '[ERROR] No recipient specified and company_email setting is empty.' . PHP_EOL . 'Usage: php index.php console send_test_email <email>' . PHP_EOL . PHP_EOL);
+            return;
+        }
+
+        response(PHP_EOL . "Sending test email to: {$recipient}..." . PHP_EOL);
+
+        try {
+            $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+            $mail->CharSet = 'UTF-8';
+            $mail->SMTPDebug = \PHPMailer\PHPMailer\SMTP::DEBUG_SERVER;
+
+            if (config('protocol') === 'smtp') {
+                $mail->isSMTP();
+                $mail->Host = config('smtp_host');
+                $mail->Port = config('smtp_port');
+                $mail->SMTPAuth = config('smtp_auth');
+                if ($mail->SMTPAuth) {
+                    $mail->Username = config('smtp_user');
+                    $mail->Password = config('smtp_pass');
+                }
+                if (!empty(config('smtp_crypto'))) {
+                    $mail->SMTPSecure = config('smtp_crypto');
+                }
+            }
+
+            $from_name = config('from_name') ?: setting('company_name');
+            $from_address = config('from_address') ?: setting('company_email');
+            $reply_to_address = config('reply_to') ?: setting('company_email');
+
+            $mail->setFrom($from_address ?: 'noreply@example.com', $from_name ?: 'Easy!Appointments');
+            if (!empty($reply_to_address)) {
+                $mail->addReplyTo($reply_to_address);
+            }
+            $mail->addAddress($recipient);
+
+            $mail->Subject = 'Easy!Appointments Test Email';
+            $mail->Body = "This is a test of the email system from Easy!Appointments (" . config('version') . ").\n\nSent at: " . date('Y-m-d H:i:s');
+
+            $mail->send();
+
+            response(PHP_EOL . "✓ Test email successfully sent to {$recipient}." . PHP_EOL . PHP_EOL);
+        } catch (\Throwable $e) {
+            response(PHP_EOL . "[ERROR] Email could not be sent: " . $e->getMessage() . PHP_EOL . PHP_EOL);
+        }
+    }
+
+    /**
      * Show help information about the console capabilities.
      *
      * Use this method to see the available commands.
@@ -202,6 +263,7 @@ class Console extends EA_Controller
             '⇾ php index.php console backup',
             '⇾ php index.php console sync',
             '⇾ php index.php console cleanup    (cleans sessions, logs, cache, and customer data)',
+            '⇾ php index.php console send_test_email [to_address] (send a test email to verify mail delivery)',
             '',
             '',
         ];
