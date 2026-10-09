@@ -21,6 +21,10 @@
                 <!-- JS -->
             </div>
 
+            <div class="col-12 mt-3 p-3 bg-light border rounded text-start fs-6" style="line-height: 22px;">
+                <strong>Cancellation Policy</strong>
+                <p class="mb-0 text-muted">We require at least 24 HOURS NOTICE for appointment cancellations so that we can fill the space. Should an appointment be missed without notice, the full appointment fee will apply.</p>
+            </div>
         </div>
 
         <?php if (setting('require_captcha')): ?>
