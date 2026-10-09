@@ -205,11 +205,16 @@
                 </div>
 
                 <div class="col-12 col-lg-6">
-                    <h4 class="mb-3 fw-light">
-                        <?= lang('appointments') ?>
-                    </h4>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="fw-light mb-0">
+                            <?= lang('appointments') ?>
+                        </h4>
+                        <a id="print-customer-notes" href="#" target="_blank" class="btn btn-sm btn-outline-primary d-none">
+                            <i class="fas fa-print me-1"></i> <?= lang('print_all_notes') ?>
+                        </a>
+                    </div>
 
-                    <div id="customer-appointments" class="card border p-3 overflow-auto mb-4" style="min-height: 400px; max-height: 800px; max-width: 330px; width: 100%;"></div>
+                    <div id="customer-appointments" class="card border p-3 overflow-auto mb-4" style="min-height: 400px; max-height: 800px; width: 100%;"></div>
 
                 </div>
             </div>
@@ -217,10 +222,14 @@
     </div>
 </div>
 
+<?php component('appointment_notes_modal'); ?>
+
 <?php end_section('content'); ?>
 
 <?php section('scripts'); ?>
 
+<script src="<?= asset_url('assets/js/http/appointment_notes_http_client.js') ?>"></script>
+<script src="<?= asset_url('assets/js/components/appointment_notes_modal.js') ?>"></script>
 <script src="<?= asset_url('assets/js/http/customers_http_client.js') ?>"></script>
 <script src="<?= asset_url('assets/js/pages/customers.js') ?>"></script>
 

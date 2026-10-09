@@ -325,6 +325,19 @@ App.Utils.CalendarDefaultView = (function () {
     }
 
     /**
+     * Handle notes popover button click.
+     */
+    function onNotesPopoverClick() {
+        closePopover();
+
+        const data = lastFocusedEventData.extendedProps.data;
+
+        if (!isUnavailability(data) && !isWorkingPlanException(data)) {
+            App.Components.AppointmentNotesModal.open(data);
+        }
+    }
+
+    /**
      * Handle delete popover button click.
      */
     function onDeletePopoverClick() {
@@ -456,6 +469,53 @@ App.Utils.CalendarDefaultView = (function () {
 
         if ($popover.length && $popover.position().top < 200) {
             $popover.css('top', '200px');
+        }
+    }
+
+    /**
+     * Handle event mounting in FullCalendar to render notes status indicator.
+     *
+     * @param {Object} info - FullCalendar event mount info object.
+     */
+    function onEventDidMount(info) {
+        const data = info.event.extendedProps?.data;
+        if (!data || Number(data.is_unavailability) || Number(data.type) === 1 || Number(data.type) === 2 || data.status === 'Cancelled') {
+            return;
+        }
+
+        const isPast = moment(data.end_datetime || info.event.end || info.event.start).isBefore(moment());
+        const isCompleted = data.status === 'Completed' || isPast;
+        const hasNotes = Boolean(data.has_notes);
+
+        if (!isCompleted && !hasNotes) {
+            return;
+        }
+
+        const iconClass = hasNotes ? 'fa-notes-medical' : 'fa-file-signature';
+        const colorClass = hasNotes ? 'text-success' : 'text-danger';
+        const tooltip = hasNotes
+            ? (lang('session_notes_recorded') || 'Session notes recorded (click to view/edit)')
+            : (lang('session_notes_awaiting') || 'Awaiting session notes (click to write)');
+
+        const $icon = $(`
+            <span class="appointment-note-indicator ${colorClass}" title="${tooltip}" role="button">
+                <i class="fas ${iconClass}"></i>
+            </span>
+        `);
+
+        $icon.on('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            App.Components.AppointmentNotesModal.open(data, () => {
+                $reloadAppointments.trigger('click');
+            });
+        });
+
+        const $title = $(info.el).find('.fc-event-title');
+        if ($title.length) {
+            $title.append($icon);
+        } else {
+            $(info.el).find('.fc-event-main, .fc-event-main-frame').first().append($icon);
         }
     }
 
@@ -1205,6 +1265,9 @@ App.Utils.CalendarDefaultView = (function () {
         // Popover edit button
         $calendarPage.on('click', '.edit-popover', onEditPopoverClick);
 
+        // Popover session notes button
+        $calendarPage.on('click', '.notes-popover', onNotesPopoverClick);
+
         // Popover delete button
         $calendarPage.on('click', '.delete-popover', onDeletePopoverClick);
 
@@ -1344,6 +1407,7 @@ App.Utils.CalendarDefaultView = (function () {
             eventResize: onEventResize,
             eventDrop: onEventDrop,
             select: onSelect,
+            eventDidMount: onEventDidMount,
         });
 
         fullCalendar.render();
