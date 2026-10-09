@@ -215,7 +215,7 @@
                                 </select>
                             </div>
 
-                            <div class="mb-3">
+                            <div class="mb-3" <?= vars('hide_timezone') ? 'style="display: none !important;" hidden' : '' ?>>
                                 <label class="form-label" for="timezone">
                                     <?= lang('timezone') ?>
                                     <span class="text-danger" hidden>*</span>

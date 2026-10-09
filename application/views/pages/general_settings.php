@@ -223,9 +223,22 @@
                                         'grouped_timezones' => vars('grouped_timezones'),
                                     ]); ?>
                                 </div>
-                                <div class="form-text text-muted">
+                                <div class="form-text text-muted mb-3">
                                     <small>
                                         <?= lang('default_timezone_hint') ?>
+                                    </small>
+                                </div>
+
+                                <div class="form-check form-switch mb-1">
+                                    <input class="form-check-input" type="checkbox" id="hide-timezone"
+                                           data-field="hide_timezone">
+                                    <label class="form-check-label" for="hide-timezone">
+                                        <?= lang('hide_timezone') ?>
+                                    </label>
+                                </div>
+                                <div class="form-text text-muted">
+                                    <small>
+                                        <?= lang('hide_timezone_hint') ?>
                                     </small>
                                 </div>
 

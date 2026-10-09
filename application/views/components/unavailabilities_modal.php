@@ -44,6 +44,7 @@
                             <input id="unavailability-end" class="form-control">
                         </div>
 
+                        <?php if (!vars('hide_timezone')): ?>
                         <div class="mb-3">
                             <label class="form-label">
                                 <?= lang('timezone') ?>
@@ -69,6 +70,7 @@
                                 </div>
                             </div>
                         </div>
+                        <?php endif; ?>
 
                         <div class="mb-3">
                             <label for="unavailability-notes" class="form-label">
