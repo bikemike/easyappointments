@@ -452,7 +452,7 @@ App.Utils.CalendarTableView = (function () {
 
         const data = lastFocusedEventData.extendedProps.data;
 
-        if (!isUnavailability(data) && !isWorkingPlanException(data)) {
+        if (!isUnavailability(data) && !isWorkingPlanException(data) && !isOneOffAvailability(data)) {
             App.Components.AppointmentNotesModal.open(data);
         }
     }
@@ -1087,34 +1087,6 @@ App.Utils.CalendarTableView = (function () {
     }
 
     /**
-     * Create blocked period calendar events.
-     *
-     * @param {jQuery} $providerColumn - Provider column element.
-     * @param {Array} blockedPeriods - Blocked period data array.
-     */
-    function createBlockedPeriods($providerColumn, blockedPeriods) {
-        if (!blockedPeriods?.length) {
-            return;
-        }
-
-        const calendarEvents = blockedPeriods.map((blockedPeriod) => ({
-            title: blockedPeriod.name,
-            start: moment(blockedPeriod.start_datetime).toDate(),
-            end: moment(blockedPeriod.end_datetime).toDate(),
-            allDay: true,
-            backgroundColor: EVENT_COLORS.blockedPeriod,
-            borderColor: EVENT_COLORS.blockedPeriod,
-            textColor: '#ffffff',
-            display: 'block',
-            editable: false,
-            className: 'fc-blocked-period fc-unavailability',
-            data: blockedPeriod,
-        }));
-
-        $providerColumn.find('.calendar-wrapper').data('fullCalendar').addEventSource(calendarEvents);
-    }
-
-    /**
      * Create one-off availability calendar events.
      *
      * @param {jQuery} $providerColumn - Provider column element.
@@ -1148,6 +1120,34 @@ App.Utils.CalendarTableView = (function () {
                     data: oneOff,
                 };
             });
+
+        $providerColumn.find('.calendar-wrapper').data('fullCalendar').addEventSource(calendarEvents);
+    }
+
+    /**
+     * Create blocked period calendar events.
+     *
+     * @param {jQuery} $providerColumn - Provider column element.
+     * @param {Array} blockedPeriods - Blocked period data array.
+     */
+    function createBlockedPeriods($providerColumn, blockedPeriods) {
+        if (!blockedPeriods?.length) {
+            return;
+        }
+
+        const calendarEvents = blockedPeriods.map((blockedPeriod) => ({
+            title: blockedPeriod.name,
+            start: moment(blockedPeriod.start_datetime).toDate(),
+            end: moment(blockedPeriod.end_datetime).toDate(),
+            allDay: true,
+            backgroundColor: EVENT_COLORS.blockedPeriod,
+            borderColor: EVENT_COLORS.blockedPeriod,
+            textColor: '#ffffff',
+            display: 'block',
+            editable: false,
+            className: 'fc-blocked-period fc-unavailability',
+            data: blockedPeriod,
+        }));
 
         $providerColumn.find('.calendar-wrapper').data('fullCalendar').addEventSource(calendarEvents);
     }
