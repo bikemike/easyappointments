@@ -276,6 +276,7 @@ App.Pages.Customers = (function () {
         $customers.find('.record-details #language').val(vars('default_language'));
 
         $customerAppointments.empty();
+        $('#print-customer-notes').addClass('d-none');
 
         $customers.find('#edit-customer, #delete-customer').prop('disabled', true);
         $customers.find('#add-edit-delete-group').show();
@@ -398,6 +399,64 @@ App.Pages.Customers = (function () {
                 ],
             }).appendTo('#customer-appointments');
         });
+
+        // Set up print notes button
+        if (customer.id) {
+            $('#print-customer-notes')
+                .attr('href', App.Utils.Url.siteUrl('appointment_notes/print_notes/' + customer.id))
+                .removeClass('d-none');
+
+            // Fetch session notes for this customer and attach to appointment cards
+            App.Http.AppointmentNotes.getByCustomer(customer.id).done((response) => {
+                const customerNotes = (response && response.notes) || [];
+                const notesByApt = {};
+                customerNotes.forEach((n) => {
+                    if (n.appointment_id) {
+                        notesByApt[n.appointment_id] = n;
+                    }
+                });
+
+                customer.appointments.forEach((appointment) => {
+                    const $aptRow = $customerAppointments.find(`.appointment-row[data-id="${appointment.id}"]`);
+                    if (!$aptRow.length) return;
+
+                    const sessionNote = notesByApt[appointment.id];
+                    if (sessionNote && sessionNote.session_notes) {
+                        $('<div/>', {
+                            'class': 'mt-2 p-2 bg-info bg-opacity-10 border border-info rounded small text-break',
+                            'html': [
+                                $('<strong/>', {
+                                    'class': 'text-primary d-block mb-1',
+                                    'html': '<i class="fas fa-notes-medical me-1"></i> ' + (lang('session_notes') || 'Session Notes') + ':',
+                                }),
+                                $('<div/>', {
+                                    'style': 'white-space: pre-wrap;',
+                                    'text': sessionNote.session_notes,
+                                }),
+                            ],
+                        }).appendTo($aptRow);
+                    }
+
+                    $('<button/>', {
+                        'type': 'button',
+                        'class': 'btn btn-sm btn-outline-primary mt-2',
+                        'html': '<i class="fas fa-edit me-1"></i> ' + (sessionNote ? (lang('session_notes') || 'Session Notes') : (lang('write_notes') || 'Write Notes')),
+                        'click': (e) => {
+                            e.preventDefault();
+                            App.Components.AppointmentNotesModal.open(
+                                {
+                                    ...appointment,
+                                    customer: customer,
+                                },
+                                () => {
+                                    display(customer);
+                                },
+                            );
+                        },
+                    }).appendTo($aptRow);
+                });
+            });
+        }
     }
 
     /**

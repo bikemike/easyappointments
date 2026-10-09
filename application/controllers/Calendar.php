@@ -843,6 +843,8 @@ class Calendar extends EA_Controller
             $end_date = request('end_date');
             $response['blocked_periods'] = $this->blocked_periods_model->get_for_period($start_date, $end_date);
 
+            $this->attach_notes_status($response['appointments']);
+
             json_response($response);
         } catch (Throwable $e) {
             json_exception($e);
@@ -1085,9 +1087,49 @@ class Calendar extends EA_Controller
             $end_date = request('end_date');
             $response['blocked_periods'] = $this->blocked_periods_model->get_for_period($start_date, $end_date);
 
+            $this->attach_notes_status($response['appointments']);
+
             json_response($response);
         } catch (Throwable $e) {
             json_exception($e);
         }
+    }
+
+    /**
+     * Attach has_notes flag to appointments array.
+     *
+     * @param array $appointments
+     */
+    private function attach_notes_status(array &$appointments): void
+    {
+        if (empty($appointments)) {
+            return;
+        }
+
+        $appointment_ids = array_column($appointments, 'id');
+        $appointment_ids = array_filter($appointment_ids, 'is_numeric');
+
+        if (empty($appointment_ids)) {
+            return;
+        }
+
+        $notes = $this->db->select('id_appointments')
+            ->from('appointment_notes')
+            ->where_in('id_appointments', $appointment_ids)
+            ->where('notes IS NOT NULL', null, false)
+            ->where("TRIM(notes) != ''", null, false)
+            ->get()
+            ->result_array();
+
+        $notes_map = [];
+        foreach ($notes as $note) {
+            $notes_map[(int) $note['id_appointments']] = true;
+        }
+
+        foreach ($appointments as &$appointment) {
+            $appointment['has_notes'] = !empty($notes_map[(int) $appointment['id']]);
+        }
+
+        unset($appointment);
     }
 }
