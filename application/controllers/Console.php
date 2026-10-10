@@ -216,42 +216,42 @@ class Console extends EA_Controller
         $this->db
             ->select('appointments.*')
             ->from('appointments')
-            ->join('users AS customers', 'customers.id = appointments.id_users_customer', 'inner')
-            ->where('appointments.is_unavailability', 0)
-            ->where('appointments.status !=', 'Cancelled')
-            ->where('appointments.id_services IS NOT NULL', null, false)
-            ->where('appointments.notified', 0)
-            ->where('appointments.start_datetime > NOW()', null, false);
+            ->join('users', 'users.id = appointments.id_users_customer', 'inner')
+            ->where('is_unavailability', 0)
+            ->where('status !=', 'Cancelled')
+            ->where('id_services IS NOT NULL', null, false)
+            ->where('notified', 0)
+            ->where('start_datetime > NOW()', null, false);
 
         if (!empty($target_email)) {
-            $this->db->where('customers.email', $target_email);
+            $this->db->where('users.email', $target_email);
         } else {
             $this->db
-                ->where('DATE_SUB(DATE(appointments.start_datetime), INTERVAL 37 HOUR) < NOW()', null, false)
-                ->where('appointments.book_datetime < DATE_SUB(appointments.start_datetime, INTERVAL 36 HOUR)', null, false);
+                ->where('DATE_SUB(DATE(start_datetime), INTERVAL 37 HOUR) < NOW()', null, false)
+                ->where('book_datetime < DATE_SUB(start_datetime, INTERVAL 36 HOUR)', null, false);
         }
 
         $query = $this->db->get();
         $appointments = $query->result_array();
 
         if ($is_simulate) {
-            response(PHP_EOL . '[DRY-RUN / SIMULATION MODE] No emails will be sent and no database records updated.' . PHP_EOL);
+            echo PHP_EOL . '[DRY-RUN / SIMULATION MODE] No emails will be sent and no database records updated.' . PHP_EOL;
         }
 
         if (!empty($target_email)) {
-            response('Filtered to recipient: ' . $target_email . PHP_EOL);
+            echo 'Filtered to recipient: ' . $target_email . PHP_EOL;
         }
 
         if (empty($appointments)) {
             if (!empty($target_email)) {
-                response(PHP_EOL . 'No upcoming appointments for ' . $target_email . ' require reminders.' . PHP_EOL . PHP_EOL);
+                echo PHP_EOL . 'No upcoming appointments for ' . $target_email . ' require reminders.' . PHP_EOL . PHP_EOL;
             } else {
-                response(PHP_EOL . 'No upcoming appointments require reminders.' . PHP_EOL . PHP_EOL);
+                echo PHP_EOL . 'No upcoming appointments require reminders.' . PHP_EOL . PHP_EOL;
             }
             return;
         }
 
-        response(PHP_EOL . 'Processing reminder email(s) for ' . count($appointments) . ' appointment(s):' . PHP_EOL);
+        echo PHP_EOL . 'Processing reminder email(s) for ' . count($appointments) . ' appointment(s):' . PHP_EOL;
 
         $company_settings = [
             'company_name' => setting('company_name'),
@@ -278,7 +278,7 @@ class Console extends EA_Controller
             $message = lang('thank_you_for_appointment') ?: '';
             $customer_link = site_url('booking/reschedule/' . $appointment['hash']);
 
-            response('⇾ Reminder to ' . $customer['email'] . ' for appointment #' . $appointment['id'] . ' (' . $appointment['start_datetime'] . ')' . PHP_EOL);
+            echo '⇾ Reminder to ' . $customer['email'] . ' for appointment #' . $appointment['id'] . ' (' . $appointment['start_datetime'] . ')' . PHP_EOL;
 
             if (!$is_simulate) {
                 $this->db->where('id', $appointment['id'])->update('appointments', ['notified' => 1]);
@@ -297,16 +297,16 @@ class Console extends EA_Controller
                         '',
                         $customer['timezone']
                     );
-                    response('  [SENT] Email successfully dispatched.' . PHP_EOL);
+                    echo '  [SENT] Email successfully dispatched.' . PHP_EOL;
                 } catch (Throwable $e) {
-                    response('  [ERROR] Failed to send email: ' . $e->getMessage() . PHP_EOL);
+                    echo '  [ERROR] Failed to send email: ' . $e->getMessage() . PHP_EOL;
                 }
             } else {
-                response('  [SIMULATED - email not sent, database not updated]' . PHP_EOL);
+                echo '  [SIMULATED - email not sent, database not updated]' . PHP_EOL;
             }
         }
 
-        response(PHP_EOL . 'Reminder task completed.' . PHP_EOL . PHP_EOL);
+        echo PHP_EOL . 'Reminder task completed.' . PHP_EOL . PHP_EOL;
     }
 
     public function send_reminders(mixed $simulate = false, ?string $email_filter = null): void
@@ -334,11 +334,11 @@ class Console extends EA_Controller
         $recipient = !empty($to_address) ? $to_address : setting('company_email');
 
         if (empty($recipient)) {
-            response(PHP_EOL . '[ERROR] No recipient specified and company_email setting is empty.' . PHP_EOL . 'Usage: php index.php console send_test_email <email>' . PHP_EOL . PHP_EOL);
+            echo PHP_EOL . '[ERROR] No recipient specified and company_email setting is empty.' . PHP_EOL . 'Usage: php index.php console send_test_email <email>' . PHP_EOL . PHP_EOL;
             return;
         }
 
-        response(PHP_EOL . "Sending test email to: {$recipient}..." . PHP_EOL);
+        echo PHP_EOL . "Sending test email to: {$recipient}..." . PHP_EOL;
 
         try {
             $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
@@ -374,9 +374,9 @@ class Console extends EA_Controller
 
             $mail->send();
 
-            response(PHP_EOL . "✓ Test email successfully sent to {$recipient}." . PHP_EOL . PHP_EOL);
+            echo PHP_EOL . "✓ Test email successfully sent to {$recipient}." . PHP_EOL . PHP_EOL;
         } catch (\Throwable $e) {
-            response(PHP_EOL . "[ERROR] Email could not be sent: " . $e->getMessage() . PHP_EOL . PHP_EOL);
+            echo PHP_EOL . "[ERROR] Email could not be sent: " . $e->getMessage() . PHP_EOL . PHP_EOL;
         }
     }
 
