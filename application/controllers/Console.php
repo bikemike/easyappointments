@@ -334,11 +334,11 @@ class Console extends EA_Controller
         $recipient = !empty($to_address) ? $to_address : setting('company_email');
 
         if (empty($recipient)) {
-            response(PHP_EOL . '[ERROR] No recipient specified and company_email setting is empty.' . PHP_EOL . 'Usage: php index.php console send_test_email <email>' . PHP_EOL . PHP_EOL);
+            echo PHP_EOL . '[ERROR] No recipient specified and company_email setting is empty.' . PHP_EOL . 'Usage: php index.php console send_test_email <email>' . PHP_EOL . PHP_EOL;
             return;
         }
 
-        response(PHP_EOL . "Sending test email to: {$recipient}..." . PHP_EOL);
+        echo PHP_EOL . "Sending test email to: {$recipient}..." . PHP_EOL;
 
         try {
             $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
@@ -374,9 +374,9 @@ class Console extends EA_Controller
 
             $mail->send();
 
-            response(PHP_EOL . "✓ Test email successfully sent to {$recipient}." . PHP_EOL . PHP_EOL);
+            echo PHP_EOL . "✓ Test email successfully sent to {$recipient}." . PHP_EOL . PHP_EOL;
         } catch (\Throwable $e) {
-            response(PHP_EOL . "[ERROR] Email could not be sent: " . $e->getMessage() . PHP_EOL . PHP_EOL);
+            echo PHP_EOL . "[ERROR] Email could not be sent: " . $e->getMessage() . PHP_EOL . PHP_EOL;
         }
     }
 
