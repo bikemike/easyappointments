@@ -178,13 +178,32 @@ class Console extends EA_Controller
      *
      * Usage:
      * php index.php console reminders
-     * php index.php console reminders 1       (simulate/dry-run)
+     * php index.php console reminders 1                   (dry-run / simulation)
+     * php index.php console reminders 1 client@test.com  (dry-run filtered to email)
+     * php index.php console reminders 0 client@test.com  (live run filtered to email)
+     * php index.php console reminders client@test.com    (live run filtered to email)
      *
-     * @param mixed $simulate
+     * @param mixed $simulate Pass 1/true/'dry-run' for dry run, 0/false for live, or an email address.
+     * @param string|null $email_filter Optional email address to filter notifications to a specific client.
      */
-    public function reminders(mixed $simulate = false): void
+    public function reminders(mixed $simulate = false, ?string $email_filter = null): void
     {
-        $is_simulate = filter_var($simulate, FILTER_VALIDATE_BOOLEAN);
+        $is_simulate = false;
+        $target_email = null;
+
+        foreach ([$simulate, $email_filter] as $arg) {
+            if ($arg === null || $arg === false || $arg === '') {
+                continue;
+            }
+            $str_arg = trim((string)$arg);
+            if (str_contains($str_arg, '@')) {
+                $target_email = strtolower($str_arg);
+            } elseif (in_array(strtolower($str_arg), ['1', 'true', 'dry-run', 'dryrun', 'simulate'], true)) {
+                $is_simulate = true;
+            } elseif (in_array(strtolower($str_arg), ['0', 'false', 'live'], true)) {
+                $is_simulate = false;
+            }
+        }
 
         $this->load->model('appointments_model');
         $this->load->model('services_model');
@@ -194,26 +213,45 @@ class Console extends EA_Controller
         $this->load->library('notifications');
         $this->load->library('email_messages');
 
-        $query = $this->db
-            ->select('*')
+        $this->db
+            ->select('appointments.*')
             ->from('appointments')
-            ->where('is_unavailability', 0)
-            ->where('status !=', 'Cancelled')
-            ->where('id_services IS NOT NULL', null, false)
-            ->where('notified', 0)
-            ->where('start_datetime > NOW()', null, false)
-            ->where('DATE_SUB(DATE(start_datetime), INTERVAL 37 HOUR) < NOW()', null, false)
-            ->where('book_datetime < DATE_SUB(start_datetime, INTERVAL 36 HOUR)', null, false)
-            ->get();
+            ->join('users AS customers', 'customers.id = appointments.id_users_customer', 'inner')
+            ->where('appointments.is_unavailability', 0)
+            ->where('appointments.status !=', 'Cancelled')
+            ->where('appointments.id_services IS NOT NULL', null, false)
+            ->where('appointments.notified', 0)
+            ->where('appointments.start_datetime > NOW()', null, false);
 
+        if (!empty($target_email)) {
+            $this->db->where('customers.email', $target_email);
+        } else {
+            $this->db
+                ->where('DATE_SUB(DATE(appointments.start_datetime), INTERVAL 37 HOUR) < NOW()', null, false)
+                ->where('appointments.book_datetime < DATE_SUB(appointments.start_datetime, INTERVAL 36 HOUR)', null, false);
+        }
+
+        $query = $this->db->get();
         $appointments = $query->result_array();
 
+        if ($is_simulate) {
+            response(PHP_EOL . '[DRY-RUN / SIMULATION MODE] No emails will be sent and no database records updated.' . PHP_EOL);
+        }
+
+        if (!empty($target_email)) {
+            response('Filtered to recipient: ' . $target_email . PHP_EOL);
+        }
+
         if (empty($appointments)) {
-            response(PHP_EOL . 'No upcoming appointments require reminders.' . PHP_EOL . PHP_EOL);
+            if (!empty($target_email)) {
+                response(PHP_EOL . 'No upcoming appointments for ' . $target_email . ' require reminders.' . PHP_EOL . PHP_EOL);
+            } else {
+                response(PHP_EOL . 'No upcoming appointments require reminders.' . PHP_EOL . PHP_EOL);
+            }
             return;
         }
 
-        response(PHP_EOL . 'Sending reminder emails for ' . count($appointments) . ' appointment(s):' . PHP_EOL);
+        response(PHP_EOL . 'Processing reminder email(s) for ' . count($appointments) . ' appointment(s):' . PHP_EOL);
 
         $company_settings = [
             'company_name' => setting('company_name'),
@@ -229,6 +267,10 @@ class Console extends EA_Controller
             $provider = $this->providers_model->find($appointment['id_users_provider']);
 
             if (!$customer || empty($customer['email'])) {
+                continue;
+            }
+
+            if (!empty($target_email) && strcasecmp($customer['email'], $target_email) !== 0) {
                 continue;
             }
 
@@ -255,25 +297,26 @@ class Console extends EA_Controller
                         '',
                         $customer['timezone']
                     );
+                    response('  [SENT] Email successfully dispatched.' . PHP_EOL);
                 } catch (Throwable $e) {
                     response('  [ERROR] Failed to send email: ' . $e->getMessage() . PHP_EOL);
                 }
             } else {
-                response('  [SIMULATED - email not sent]' . PHP_EOL);
+                response('  [SIMULATED - email not sent, database not updated]' . PHP_EOL);
             }
         }
 
         response(PHP_EOL . 'Reminder task completed.' . PHP_EOL . PHP_EOL);
     }
 
-    public function send_reminders(mixed $simulate = false): void
+    public function send_reminders(mixed $simulate = false, ?string $email_filter = null): void
     {
-        $this->reminders($simulate);
+        $this->reminders($simulate, $email_filter);
     }
 
-    public function send_appointment_reminders(mixed $simulate = false): void
+    public function send_appointment_reminders(mixed $simulate = false, ?string $email_filter = null): void
     {
-        $this->reminders($simulate);
+        $this->reminders($simulate, $email_filter);
     }
 
     /**
@@ -367,7 +410,7 @@ class Console extends EA_Controller
             '⇾ php index.php console backup',
             '⇾ php index.php console sync',
             '⇾ php index.php console cleanup    (cleans sessions, logs, cache, and customer data)',
-            '⇾ php index.php console reminders  (send upcoming appointment reminders to clients)',
+            '⇾ php index.php console reminders [simulate=0/1] [email] (send upcoming appointment reminders)',
             '⇾ php index.php console send_test_email [to_address] (send a test email to verify mail delivery)',
             '',
             '',
