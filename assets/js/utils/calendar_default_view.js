@@ -1019,6 +1019,67 @@ App.Utils.CalendarDefaultView = (function () {
     }
 
     /**
+     * Update calendar toolbar button labels based on screen width.
+     */
+    function updateResponsiveButtonLabels() {
+        const isMobile = window.innerWidth < 768;
+
+        const $dayBtn = $calendar.find('.fc-timeGridDay-button');
+        const $workWeekBtn = $calendar.find('.fc-timeGridWorkWeek-button');
+        const $weekBtn = $calendar.find('.fc-timeGridWeek-button');
+        const $monthBtn = $calendar.find('.fc-dayGridMonth-button');
+        const $todayBtn = $calendar.find('.fc-today-button');
+
+        if (isMobile) {
+            if ($dayBtn.length) {
+                $dayBtn.text('D').attr('title', lang('day'));
+            }
+            if ($workWeekBtn.length) {
+                $workWeekBtn.text('M-F').attr('title', lang('work_week') || 'M-F');
+            }
+            if ($weekBtn.length) {
+                $weekBtn.text('W').attr('title', lang('week'));
+            }
+            if ($monthBtn.length) {
+                $monthBtn.text('M').attr('title', lang('month'));
+            }
+            if ($todayBtn.length && !$todayBtn.find('.fa-calendar-day, .svg-inline--fa').length) {
+                $todayBtn.html('<i class="fas fa-calendar-day"></i>').attr('title', lang('today'));
+                if (window.FontAwesome && window.FontAwesome.dom && window.FontAwesome.dom.i2svg) {
+                    window.FontAwesome.dom.i2svg({ node: $todayBtn[0] });
+                }
+            }
+        } else {
+            const dayText = lang('day');
+            const workWeekText = lang('work_week') || 'M-F';
+            const weekText = lang('week');
+            const monthText = lang('month');
+            const todayText = lang('today');
+
+            if ($dayBtn.length && $dayBtn.text() !== dayText) {
+                $dayBtn.text(dayText).removeAttr('title');
+            }
+            if ($workWeekBtn.length && $workWeekBtn.text() !== workWeekText) {
+                $workWeekBtn.text(workWeekText).removeAttr('title');
+            }
+            if ($weekBtn.length && $weekBtn.text() !== weekText) {
+                $weekBtn.text(weekText).removeAttr('title');
+            }
+            if ($monthBtn.length && $monthBtn.text() !== monthText) {
+                $monthBtn.text(monthText).removeAttr('title');
+            }
+            if ($todayBtn.length && $todayBtn.text() !== todayText) {
+                $todayBtn.text(todayText).removeAttr('title');
+            }
+        }
+
+        const $toolbarTitle = $calendar.find('.fc-toolbar-title');
+        if ($toolbarTitle.length) {
+            $toolbarTitle.attr('title', $toolbarTitle.text());
+        }
+    }
+
+    /**
      * Handle calendar window resize.
      */
     function onWindowResize() {
@@ -1026,6 +1087,7 @@ App.Utils.CalendarDefaultView = (function () {
         if (height !== 'auto') {
             fullCalendar.setOption('height', height);
         }
+        updateResponsiveButtonLabels();
     }
 
     /**
@@ -1036,13 +1098,7 @@ App.Utils.CalendarDefaultView = (function () {
             window.localStorage.setItem('EasyAppointments.CalendarView', info.view.type);
         }
 
-        $calendar.find('.fc-timeGridDay-button').attr('title', lang('day'));
-        $calendar.find('.fc-timeGridWorkWeek-button').attr('title', lang('work_week') || 'M-F');
-        $calendar.find('.fc-timeGridWeek-button').attr('title', lang('week'));
-        $calendar.find('.fc-dayGridMonth-button').attr('title', lang('month'));
-        $calendar.find('.fc-today-button').attr('title', lang('today'));
-        const $toolbarTitle = $calendar.find('.fc-toolbar-title');
-        $toolbarTitle.attr('title', $toolbarTitle.text());
+        updateResponsiveButtonLabels();
 
         if (!$selectFilterItem.val()) return;
 
