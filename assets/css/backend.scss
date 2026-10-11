@@ -643,18 +643,36 @@ body .modal.full-screen .modal-push {
         padding: 0.25rem 0.4rem !important;
         font-size: 0.8rem !important;
         min-width: 1.85rem;
+        height: 1.85rem;
+        border-radius: 0.25rem !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    #calendar .fc-header-toolbar .fc-button-group > .fc-button:not(:first-child) {
+        border-top-left-radius: 0 !important;
+        border-bottom-left-radius: 0 !important;
+    }
+    #calendar .fc-header-toolbar .fc-button-group > .fc-button:not(:last-child) {
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
     }
 
     #calendar .fc-header-toolbar .fc-today-button {
         font-size: 0 !important;
+        min-width: 1.85rem;
+        height: 1.85rem;
+        border-radius: 0.25rem !important;
+        margin-left: 3px !important;
     }
 
     #calendar .fc-header-toolbar .fc-today-button svg,
     #calendar .fc-header-toolbar .fc-today-button i {
-        font-size: 0.85rem !important;
+        font-size: 0.9rem !important;
         width: 1em !important;
         height: 1em !important;
-        vertical-align: -0.125em !important;
+        vertical-align: middle !important;
         display: inline-block !important;
     }
 
