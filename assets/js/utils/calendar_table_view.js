@@ -1639,6 +1639,13 @@ App.Utils.CalendarTableView = (function () {
         const {columnFormat, timeFormat, slotTimeFormat} = getFormatSettings();
         const firstWeekdayNumber = App.Utils.Date.getWeekdayId(vars('first_weekday'));
 
+        const formatSlotTime = (timeStr, defaultTime) => {
+            if (!timeStr) return defaultTime;
+            return timeStr.length === 5 ? timeStr + ':00' : timeStr;
+        };
+        const slotMinTime = formatSlotTime(vars('day_start_time'), '08:00:00');
+        const slotMaxTime = formatSlotTime(vars('day_end_time'), '22:00:00');
+
         const fullCalendar = new FullCalendar.Calendar($wrapper[0], {
             locale: vars('language_code'),
             initialView: 'timeGridDay',
@@ -1646,9 +1653,11 @@ App.Utils.CalendarTableView = (function () {
             height: getCalendarHeight(),
             editable: true,
             firstDay: firstWeekdayNumber,
+            slotMinTime,
+            slotMaxTime,
             slotDuration: '00:15:00',
             snapDuration: '00:15:00',
-            scrollTime: '07:00:00',
+            scrollTime: slotMinTime,
             slotLabelInterval: '01:00',
             eventTimeFormat: timeFormat,
             eventTextColor: '#333',
