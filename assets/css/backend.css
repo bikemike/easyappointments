@@ -629,8 +629,9 @@ body .modal.full-screen .modal-push {
   }
 
   #calendar .fc-header-toolbar .fc-button {
-    padding: 0.25rem 0.35rem !important;
-    font-size: 0.75rem !important;
+    padding: 0.25rem 0.4rem !important;
+    font-size: 0.8rem !important;
+    min-width: 1.85rem;
   }
 
   #calendar .fc-toolbar-title {
@@ -638,56 +639,8 @@ body .modal.full-screen .modal-push {
     line-height: 1.2;
   }
 
-  /* View buttons abbreviated to single letter / M-F */
-  #calendar .fc-timeGridDay-button {
-    font-size: 0 !important;
-    padding-left: 0.4rem !important;
-    padding-right: 0.4rem !important;
-  }
-  #calendar .fc-timeGridDay-button::after {
-    content: "D";
-    font-size: 0.75rem;
-  }
-
   #calendar .fc-timeGridWorkWeek-button {
-    font-size: 0 !important;
-    padding-left: 0.35rem !important;
-    padding-right: 0.35rem !important;
-  }
-  #calendar .fc-timeGridWorkWeek-button::after {
-    content: "M-F";
-    font-size: 0.75rem;
-  }
-
-  #calendar .fc-timeGridWeek-button {
-    font-size: 0 !important;
-    padding-left: 0.4rem !important;
-    padding-right: 0.4rem !important;
-  }
-  #calendar .fc-timeGridWeek-button::after {
-    content: "W";
-    font-size: 0.75rem;
-  }
-
-  #calendar .fc-dayGridMonth-button {
-    font-size: 0 !important;
-    padding-left: 0.4rem !important;
-    padding-right: 0.4rem !important;
-  }
-  #calendar .fc-dayGridMonth-button::after {
-    content: "M";
-    font-size: 0.75rem;
-  }
-
-  /* Today button abbreviated to T on small screens */
-  #calendar .fc-today-button {
-    font-size: 0 !important;
-    padding-left: 0.4rem !important;
-    padding-right: 0.4rem !important;
-  }
-  #calendar .fc-today-button::after {
-    content: "T";
-    font-size: 0.75rem;
+    min-width: 2.2rem;
   }
 }
 /* Calendar table view filter groups (label + select side by side). */
