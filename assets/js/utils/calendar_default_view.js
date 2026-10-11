@@ -1036,6 +1036,14 @@ App.Utils.CalendarDefaultView = (function () {
             window.localStorage.setItem('EasyAppointments.CalendarView', info.view.type);
         }
 
+        $calendar.find('.fc-timeGridDay-button').attr('title', lang('day'));
+        $calendar.find('.fc-timeGridWorkWeek-button').attr('title', lang('work_week') || 'M-F');
+        $calendar.find('.fc-timeGridWeek-button').attr('title', lang('week'));
+        $calendar.find('.fc-dayGridMonth-button').attr('title', lang('month'));
+        $calendar.find('.fc-today-button').attr('title', lang('today'));
+        const $toolbarTitle = $calendar.find('.fc-toolbar-title');
+        $toolbarTitle.attr('title', $toolbarTitle.text());
+
         if (!$selectFilterItem.val()) return;
 
         refreshCalendarAppointments(
