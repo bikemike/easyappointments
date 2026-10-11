@@ -1043,11 +1043,17 @@ App.Utils.CalendarDefaultView = (function () {
             if ($monthBtn.length) {
                 $monthBtn.text('M').attr('title', lang('month'));
             }
-            if ($todayBtn.length && !$todayBtn.find('.fa-calendar-day, .svg-inline--fa').length) {
-                $todayBtn.html('<i class="fas fa-calendar-day"></i>').attr('title', lang('today'));
-                if (window.FontAwesome && window.FontAwesome.dom && window.FontAwesome.dom.i2svg) {
-                    window.FontAwesome.dom.i2svg({ node: $todayBtn[0] });
+            if ($todayBtn.length) {
+                if (!$todayBtn.find('.fa-calendar-day, .svg-inline--fa').length) {
+                    $todayBtn.html('<i class="fas fa-calendar-day"></i>');
+                    if (window.FontAwesome && window.FontAwesome.dom && window.FontAwesome.dom.i2svg) {
+                        window.FontAwesome.dom.i2svg({ node: $todayBtn[0] });
+                    }
                 }
+                $todayBtn.contents().filter(function () {
+                    return this.nodeType === 3;
+                }).remove();
+                $todayBtn.attr('title', lang('today'));
             }
         } else {
             const dayText = lang('day');

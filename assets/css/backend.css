@@ -640,6 +640,19 @@ body .modal.full-screen .modal-push {
     min-width: 1.85rem;
   }
 
+  #calendar .fc-header-toolbar .fc-today-button {
+    font-size: 0 !important;
+  }
+
+  #calendar .fc-header-toolbar .fc-today-button svg,
+  #calendar .fc-header-toolbar .fc-today-button i {
+    font-size: 0.85rem !important;
+    width: 1em !important;
+    height: 1em !important;
+    vertical-align: -0.125em !important;
+    display: inline-block !important;
+  }
+
   #calendar .fc-toolbar-title {
     font-size: clamp(0.72rem, 2.6vw, 0.95rem) !important;
     line-height: 1.2;
