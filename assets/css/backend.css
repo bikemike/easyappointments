@@ -164,12 +164,36 @@ body .modal.full-screen .modal-push {
 }
 
 #calendar .fc-header-toolbar {
-  display: block;
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 4px;
+  margin-bottom: 12px;
 }
 
 #calendar .fc-header-toolbar .fc-toolbar-chunk {
-  margin-bottom: 10px;
+  margin-bottom: 0 !important;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+#calendar .fc-header-toolbar .fc-toolbar-chunk:nth-child(2) {
+  flex-shrink: 1;
+  min-width: 0;
+  justify-content: center;
   text-align: center;
+  padding: 0 4px;
+}
+
+#calendar .fc-toolbar-title {
+  margin: 0;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 1.35rem;
 }
 
 #calendar .fc-col-header-cell-cushion {
@@ -557,36 +581,113 @@ body .modal.full-screen .modal-push {
 }
 /* Responsive adjustments */
 @media (min-width: 768px) {
-  #calendar .fc-header-toolbar .fc-toolbar-chunk {
-    margin-bottom: 0;
-    text-align: center;
-  }
-  .fc-header-toolbar {
-    display: flex !important;
-    text-align: left;
-  }
   #calendar .calendar-header .select2-container {
     width: 300px !important;
   }
 }
-/* On mobile viewports the sync buttons should occupy a full row, with the
-   action buttons (add, reload, view switch) appearing on the next line. */
-@media (max-width: 991.98px) {
-  #calendar-actions #enable-sync,
-  #calendar-actions #sync-button-group {
-    display: flex;
-    width: 100%;
-    margin-bottom: 0.5rem;
+
+/* Mobile & Small screens responsive calendar controls */
+@media (max-width: 767.98px) {
+  /* Calendar toolbar compact 1-row layout */
+  #calendar-toolbar {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
   }
-  #calendar-actions #sync-button-group #trigger-sync {
-    flex: 1 1 auto;
-    text-align: left;
+
+  #calendar-filter select {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.85rem;
   }
+
+  #calendar-actions .btn {
+    padding: 0.35rem 0.45rem;
+    font-size: 0.85rem;
+  }
+
+  /* Hide text inside sync buttons on mobile so they stay icon-only and compact */
+  #calendar-actions #enable-sync .btn-text,
+  #calendar-actions #trigger-sync .btn-text {
+    display: none;
+  }
+
+  #calendar-actions #enable-sync i,
+  #calendar-actions #trigger-sync i {
+    margin-right: 0 !important;
+  }
+
   #calendar-actions #sync-button-group .dropdown-toggle-split {
-    flex: 0 0 auto;
-    width: 3rem;
-    padding-left: 0;
-    padding-right: 0;
+    padding-left: 0.3rem;
+    padding-right: 0.3rem;
+  }
+
+  /* Calendar Header Toolbar: 1-row compact layout */
+  #calendar .fc-header-toolbar {
+    gap: 2px;
+    margin-bottom: 8px;
+  }
+
+  #calendar .fc-header-toolbar .fc-button {
+    padding: 0.25rem 0.35rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  #calendar .fc-toolbar-title {
+    font-size: clamp(0.72rem, 2.6vw, 0.95rem) !important;
+    line-height: 1.2;
+  }
+
+  /* View buttons abbreviated to single letter / M-F */
+  #calendar .fc-timeGridDay-button {
+    font-size: 0 !important;
+    padding-left: 0.4rem !important;
+    padding-right: 0.4rem !important;
+  }
+  #calendar .fc-timeGridDay-button::after {
+    content: "D";
+    font-size: 0.75rem;
+  }
+
+  #calendar .fc-timeGridWorkWeek-button {
+    font-size: 0 !important;
+    padding-left: 0.35rem !important;
+    padding-right: 0.35rem !important;
+  }
+  #calendar .fc-timeGridWorkWeek-button::after {
+    content: "M-F";
+    font-size: 0.75rem;
+  }
+
+  #calendar .fc-timeGridWeek-button {
+    font-size: 0 !important;
+    padding-left: 0.4rem !important;
+    padding-right: 0.4rem !important;
+  }
+  #calendar .fc-timeGridWeek-button::after {
+    content: "W";
+    font-size: 0.75rem;
+  }
+
+  #calendar .fc-dayGridMonth-button {
+    font-size: 0 !important;
+    padding-left: 0.4rem !important;
+    padding-right: 0.4rem !important;
+  }
+  #calendar .fc-dayGridMonth-button::after {
+    content: "M";
+    font-size: 0.75rem;
+  }
+
+  /* Today button abbreviated to T on small screens */
+  #calendar .fc-today-button {
+    font-size: 0 !important;
+    padding-left: 0.4rem !important;
+    padding-right: 0.4rem !important;
+  }
+  #calendar .fc-today-button::after {
+    content: "T";
+    font-size: 0.75rem;
   }
 }
 /* Calendar table view filter groups (label + select side by side). */
