@@ -184,6 +184,12 @@ body .modal.full-screen .modal-push {
     display: flex;
     align-items: center;
     flex-shrink: 0;
+    flex-wrap: nowrap !important;
+}
+
+#calendar .fc-header-toolbar .fc-button-group {
+    display: inline-flex;
+    flex-wrap: nowrap !important;
 }
 
 #calendar .fc-header-toolbar .fc-toolbar-chunk:nth-child(2) {
