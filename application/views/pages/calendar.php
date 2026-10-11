@@ -23,14 +23,14 @@
                     data-tippy-content="<?= lang('enable_appointment_sync_hint') ?>"
                     hidden>
                     <i class="fas fa-rotate me-md-2"></i>
-                    <span class="btn-text"><?= lang('enable_sync') ?></span>
+                    <span class="btn-text d-none d-md-inline"><?= lang('enable_sync') ?></span>
                 </button>
 
                 <div class="btn-group" id="sync-button-group" hidden>
                     <button type="button" class="btn btn-light" id="trigger-sync"
                             data-tippy-content="<?= lang('trigger_sync_hint') ?>">
                         <i class="fas fa-rotate me-md-2"></i>
-                        <span class="btn-text"><?= lang('synchronize') ?></span>
+                        <span class="btn-text d-none d-md-inline"><?= lang('synchronize') ?></span>
                     </button>
                     <button type="button" class="btn btn-light dropdown-toggle dropdown-toggle-split"
                             data-bs-toggle="dropdown" aria-expanded="false">
