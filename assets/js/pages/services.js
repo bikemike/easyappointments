@@ -29,6 +29,7 @@ App.Pages.Services = (function () {
     const $description = $('#description');
     const $filterServices = $('#filter-services');
     const $color = $('#color');
+    const $applyColorToExistingAppointments = $('#apply-color-to-existing-appointments');
     let filterResults = {};
     let filterLimit = 20;
 
@@ -100,6 +101,7 @@ App.Pages.Services = (function () {
             App.Components.ColorSelection.enable($color);
             $('#service-providers input:checkbox').prop('disabled', false);
             $('#select-all-providers, #select-none-providers').prop('disabled', false);
+            $applyColorToExistingAppointments.prop('disabled', false).prop('checked', false);
         });
 
         /**
@@ -118,6 +120,7 @@ App.Pages.Services = (function () {
             App.Components.ColorSelection.enable($color);
             $('#service-providers input:checkbox').prop('disabled', false);
             $('#select-all-providers, #select-none-providers').prop('disabled', false);
+            $applyColorToExistingAppointments.prop('disabled', true).prop('checked', false);
 
             // Default values
             $name.val('Service');
@@ -157,6 +160,7 @@ App.Pages.Services = (function () {
                 description: $description.val(),
                 location: $location.val(),
                 color: App.Components.ColorSelection.getColor($color),
+                apply_color_to_existing_appointments: Boolean($applyColorToExistingAppointments.prop('checked')),
                 slot_interval: $slotInterval.val(),
                 attendants_number: $attendantsNumber.val(),
                 is_private: Number($isPrivate.prop('checked')),
@@ -196,6 +200,7 @@ App.Pages.Services = (function () {
             App.Components.ColorSelection.enable($color);
             $('#service-providers input:checkbox').prop('disabled', false);
             $('#select-all-providers, #select-none-providers').prop('disabled', false);
+            $applyColorToExistingAppointments.prop('disabled', false).prop('checked', false);
         });
 
         /**
@@ -315,6 +320,7 @@ App.Pages.Services = (function () {
         $services.find('.record-details').find('input, select, textarea').val('').prop('disabled', true);
         $services.find('.record-details .form-label span').prop('hidden', true);
         $services.find('.record-details #is-private').prop('checked', false);
+        $applyColorToExistingAppointments.prop('checked', false).prop('disabled', true);
         $services.find('.record-details h4 a').remove();
 
         $services.find('.add-edit-delete-group').show();
@@ -349,6 +355,7 @@ App.Pages.Services = (function () {
         $attendantsNumber.val(service.attendants_number);
         $isPrivate.prop('checked', service.is_private);
         App.Components.ColorSelection.setColor($color, service.color);
+        $applyColorToExistingAppointments.prop('checked', false);
 
         const serviceCategoryId = service.id_service_categories !== null ? service.id_service_categories : '';
         $serviceCategoryId.val(serviceCategoryId);

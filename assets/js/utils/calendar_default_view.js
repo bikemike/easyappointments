@@ -25,10 +25,10 @@ App.Utils.CalendarDefaultView = (function () {
     const FILTER_TYPE_PROVIDER = 'provider';
     const FILTER_TYPE_SERVICE = 'service';
     const EVENT_COLORS = {
-        unavailability: '#879DB4',
+        unavailability: (typeof vars === 'function' && vars('color_unavailability')) || '#879DB4',
         oneOffAvailability: '#28a745',
-        blockedPeriod: '#d65069',
-        notWorking: '#BEBEBE',
+        blockedPeriod: (typeof vars === 'function' && vars('color_blocked_period')) || '#d65069',
+        notWorking: (typeof vars === 'function' && vars('color_not_working')) || '#BEBEBE',
         default: '#7cbae8',
     };
 

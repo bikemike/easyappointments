@@ -156,11 +156,22 @@ class Services extends EA_Controller
 
             $service = request('service');
 
+            $apply_color_to_existing = filter_var($service['apply_color_to_existing_appointments'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
             $this->services_model->only($service, $this->allowed_service_fields);
 
             $this->services_model->optional($service, $this->optional_service_fields);
 
             $service_id = $this->services_model->save($service);
+
+            if ($apply_color_to_existing) {
+                $color = !empty($service['color']) ? $service['color'] : $this->services_model->find($service_id)['color'];
+                if (!empty($color)) {
+                    $this->db->where('id_services', $service_id)
+                        ->where('is_unavailability', 0)
+                        ->update('appointments', ['color' => $color]);
+                }
+            }
 
             $service = $this->services_model->find($service_id);
 
@@ -220,11 +231,22 @@ class Services extends EA_Controller
 
             $service = request('service');
 
+            $apply_color_to_existing = filter_var($service['apply_color_to_existing_appointments'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
             $this->services_model->only($service, $this->allowed_service_fields);
 
             $this->services_model->optional($service, $this->optional_service_fields);
 
             $service_id = $this->services_model->save($service);
+
+            if ($apply_color_to_existing) {
+                $color = !empty($service['color']) ? $service['color'] : $this->services_model->find($service_id)['color'];
+                if (!empty($color)) {
+                    $this->db->where('id_services', $service_id)
+                        ->where('is_unavailability', 0)
+                        ->update('appointments', ['color' => $color]);
+                }
+            }
 
             $service = $this->services_model->find($service_id);
 
