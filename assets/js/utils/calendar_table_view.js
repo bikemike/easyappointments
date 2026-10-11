@@ -71,6 +71,26 @@ App.Utils.CalendarTableView = (function () {
     }
 
     /**
+     * Resolve the configured calendar height.
+     *
+     * @returns {string|number} 'auto' or height in pixels.
+     */
+    function resolveCalendarHeight() {
+        const calendarHeightSetting = (typeof vars === 'function' && vars('calendar_height')) || 'auto';
+
+        if (calendarHeightSetting === 'auto') {
+            return 'auto';
+        }
+
+        if (calendarHeightSetting === 'window') {
+            return getCalendarHeight();
+        }
+
+        const parsed = parseInt(calendarHeightSetting, 10);
+        return !isNaN(parsed) && parsed > 0 ? parsed : 'auto';
+    }
+
+    /**
      * Close the current popover if open.
      */
     function closePopover() {
@@ -1650,7 +1670,7 @@ App.Utils.CalendarTableView = (function () {
             locale: vars('language_code'),
             initialView: 'timeGridDay',
             nowIndicator: true,
-            height: getCalendarHeight(),
+            height: resolveCalendarHeight(),
             editable: true,
             firstDay: firstWeekdayNumber,
             slotMinTime,
@@ -1711,7 +1731,12 @@ App.Utils.CalendarTableView = (function () {
         $calendarViewDiv.css('min-width', width + 200);
         const dateColumnHeight = $dateColumn.outerHeight();
 
-        $('.calendar-wrapper').height(getCalendarHeight());
+        const calendarHeight = resolveCalendarHeight();
+        if (calendarHeight !== 'auto') {
+            $('.calendar-wrapper').height(calendarHeight);
+        } else {
+            $('.calendar-wrapper').css('height', 'auto');
+        }
     }
 
     // Event Listeners
