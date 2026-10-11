@@ -3,11 +3,11 @@
 <?php section('content'); ?>
 
 <div class="container-fluid backend-page pt-0 pb-0" id="calendar-page">
-    <div class="row mb-3 text-white py-3 bg-dark" id="calendar-toolbar">
-        <div id="calendar-filter" class="col-lg-3">
+    <div class="row mb-3 text-white py-2 py-md-3 bg-dark align-items-center flex-nowrap" id="calendar-toolbar">
+        <div id="calendar-filter" class="col flex-grow-1 min-w-0">
             <div class="calendar-filter-items">
                 <select id="select-filter-item"
-                        class="form-select col mb-2 mb-lg-0"
+                        class="form-select m-0"
                         data-tippy-content="<?= lang('select_filter_item_hint') ?>"
                         aria-label="Filter">
                     <!-- JS -->
@@ -15,22 +15,22 @@
             </div>
         </div>
 
-        <div id="calendar-actions" class="col-lg-9 text-md-end">
+        <div id="calendar-actions" class="col-auto d-flex align-items-center gap-1 text-end flex-nowrap">
             <?php if (vars('calendar_view') === CALENDAR_VIEW_DEFAULT): ?>
                 <button
                     id="enable-sync"
                     class="btn btn-light"
                     data-tippy-content="<?= lang('enable_appointment_sync_hint') ?>"
                     hidden>
-                    <i class="fas fa-rotate me-2"></i>
-                    <?= lang('enable_sync') ?>
+                    <i class="fas fa-rotate me-md-2"></i>
+                    <span class="btn-text"><?= lang('enable_sync') ?></span>
                 </button>
 
                 <div class="btn-group" id="sync-button-group" hidden>
                     <button type="button" class="btn btn-light" id="trigger-sync"
                             data-tippy-content="<?= lang('trigger_sync_hint') ?>">
-                        <i class="fas fa-rotate me-2"></i>
-                        <?= lang('synchronize') ?>
+                        <i class="fas fa-rotate me-md-2"></i>
+                        <span class="btn-text"><?= lang('synchronize') ?></span>
                     </button>
                     <button type="button" class="btn btn-light dropdown-toggle dropdown-toggle-split"
                             data-bs-toggle="dropdown" aria-expanded="false">
