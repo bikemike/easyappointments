@@ -67,6 +67,26 @@ App.Utils.CalendarDefaultView = (function () {
     }
 
     /**
+     * Resolve the configured calendar height.
+     *
+     * @returns {string|number} 'auto' or height in pixels.
+     */
+    function resolveCalendarHeight() {
+        const calendarHeightSetting = (typeof vars === 'function' && vars('calendar_height')) || 'auto';
+
+        if (calendarHeightSetting === 'auto') {
+            return 'auto';
+        }
+
+        if (calendarHeightSetting === 'window') {
+            return getCalendarHeight();
+        }
+
+        const parsed = parseInt(calendarHeightSetting, 10);
+        return !isNaN(parsed) && parsed > 0 ? parsed : 'auto';
+    }
+
+    /**
      * Get the selected filter type from the dropdown.
      *
      * @returns {string} Filter type constant.
@@ -1002,7 +1022,10 @@ App.Utils.CalendarDefaultView = (function () {
      * Handle calendar window resize.
      */
     function onWindowResize() {
-        fullCalendar.setOption('height', getCalendarHeight());
+        const height = resolveCalendarHeight();
+        if (height !== 'auto') {
+            fullCalendar.setOption('height', height);
+        }
     }
 
     /**
@@ -1543,7 +1566,7 @@ App.Utils.CalendarDefaultView = (function () {
             initialView,
             locale: vars('language_code'),
             nowIndicator: true,
-            height: getCalendarHeight(),
+            height: resolveCalendarHeight(),
             editable: true,
             firstDay: firstWeekdayNumber,
             slotMinTime,
