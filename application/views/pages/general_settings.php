@@ -233,6 +233,22 @@
                                 </div>
 
                                 <div class="mb-3">
+                                    <label class="form-label" for="calendar-height">
+                                        <?= lang('calendar_height') ?>
+                                    </label>
+                                    <select class="form-select" id="calendar-height" data-field="calendar_height">
+                                        <option value="auto"><?= lang('calendar_height_auto') ?></option>
+                                        <option value="window"><?= lang('calendar_height_window') ?></option>
+                                        <option value="1000"><?= lang('calendar_height_tall') ?></option>
+                                    </select>
+                                    <div class="form-text text-muted">
+                                        <small>
+                                            <?= lang('calendar_height_hint') ?>
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
                                     <label class="form-label" for="default-language">
                                         <?= lang('default_language') ?>
                                         <span class="text-danger" hidden>*</span>
