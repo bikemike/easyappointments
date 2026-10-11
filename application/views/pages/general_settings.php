@@ -285,6 +285,45 @@
                             </div>
                         </div>
 
+                        <div class="row mb-5">
+                            <div class="col-12">
+                                <h5 class="mb-3 fw-light"><?= lang('calendar_colors') ?></h5>
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="color-not-working">
+                                        <?= lang('color_not_working') ?>
+                                    </label>
+                                    <input type="color" id="color-not-working" data-field="color_not_working"
+                                           class="form-control form-control-color" value="#bebebe">
+                                    <div class="form-text text-muted">
+                                        <small><?= lang('color_not_working_hint') ?></small>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="color-unavailability">
+                                        <?= lang('color_unavailability') ?>
+                                    </label>
+                                    <input type="color" id="color-unavailability" data-field="color_unavailability"
+                                           class="form-control form-control-color" value="#879db4">
+                                    <div class="form-text text-muted">
+                                        <small><?= lang('color_unavailability_hint') ?></small>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="color-blocked-period">
+                                        <?= lang('color_blocked_period') ?>
+                                    </label>
+                                    <input type="color" id="color-blocked-period" data-field="color_blocked_period"
+                                           class="form-control form-control-color" value="#d65069">
+                                    <div class="form-text text-muted">
+                                        <small><?= lang('color_blocked_period_hint') ?></small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </fieldset>
                 </form>
             </div>

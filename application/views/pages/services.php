@@ -128,6 +128,16 @@
 
             <div class="mb-3">
                 <?php component('color_selection', ['attributes' => 'id="color"']); ?>
+
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" id="apply-color-to-existing-appointments" disabled>
+                    <label class="form-check-label" for="apply-color-to-existing-appointments">
+                        <?= lang('apply_color_to_existing_appointments') ?>
+                    </label>
+                    <div class="form-text text-muted">
+                        <small><?= lang('apply_color_to_existing_appointments_hint') ?></small>
+                    </div>
+                </div>
             </div>
 
             <div>
