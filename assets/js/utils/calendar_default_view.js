@@ -1008,7 +1008,11 @@ App.Utils.CalendarDefaultView = (function () {
     /**
      * Handle calendar dates change (view render).
      */
-    function onDatesSet() {
+    function onDatesSet(info) {
+        if (info && info.view && info.view.type) {
+            window.localStorage.setItem('EasyAppointments.CalendarView', info.view.type);
+        }
+
         if (!$selectFilterItem.val()) return;
 
         refreshCalendarAppointments(
@@ -1522,8 +1526,17 @@ App.Utils.CalendarDefaultView = (function () {
      */
     function initialize() {
         const {columnFormat, timeFormat, slotTimeFormat} = getFormatSettings();
-        const initialView = window.innerWidth < 468 ? 'timeGridDay' : 'timeGridWeek';
+        const savedView = window.localStorage.getItem('EasyAppointments.CalendarView');
+        const validViews = ['timeGridDay', 'timeGridWorkWeek', 'timeGridWeek', 'dayGridMonth'];
+        const initialView = window.innerWidth < 468 ? 'timeGridDay' : (validViews.includes(savedView) ? savedView : 'timeGridWeek');
         const firstWeekdayNumber = App.Utils.Date.getWeekdayId(vars('first_weekday'));
+
+        const formatSlotTime = (timeStr, defaultTime) => {
+            if (!timeStr) return defaultTime;
+            return timeStr.length === 5 ? timeStr + ':00' : timeStr;
+        };
+        const slotMinTime = formatSlotTime(vars('day_start_time'), '08:00:00');
+        const slotMaxTime = formatSlotTime(vars('day_end_time'), '22:00:00');
 
         // Create FullCalendar instance
         fullCalendar = new FullCalendar.Calendar($calendar[0], {
@@ -1533,9 +1546,11 @@ App.Utils.CalendarDefaultView = (function () {
             height: getCalendarHeight(),
             editable: true,
             firstDay: firstWeekdayNumber,
+            slotMinTime,
+            slotMaxTime,
             slotDuration: '00:15:00',
             snapDuration: '00:15:00',
-            scrollTime: '07:00:00',
+            scrollTime: slotMinTime,
             slotLabelInterval: '01:00',
             eventTimeFormat: timeFormat,
             eventTextColor: '#333',
@@ -1546,14 +1561,23 @@ App.Utils.CalendarDefaultView = (function () {
             selectMirror: true,
             themeSystem: 'bootstrap5',
             selectLongPressDelay: 100,
+            views: {
+                timeGridWorkWeek: {
+                    type: 'timeGrid',
+                    duration: { weeks: 1 },
+                    hiddenDays: [0, 6],
+                    buttonText: lang('work_week') || 'M-F',
+                },
+            },
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
-                right: 'timeGridDay,timeGridWeek,dayGridMonth',
+                right: 'timeGridDay,timeGridWorkWeek,timeGridWeek,dayGridMonth',
             },
             buttonText: {
                 today: lang('today'),
                 day: lang('day'),
+                timeGridWorkWeek: lang('work_week') || 'M-F',
                 week: lang('week'),
                 month: lang('month'),
             },

@@ -193,6 +193,46 @@
                                 </div>
 
                                 <div class="mb-3">
+                                    <label class="form-label" for="day-start-time">
+                                        <?= lang('day_start_time') ?>
+                                    </label>
+                                    <select class="form-select" id="day-start-time" data-field="day_start_time">
+                                        <?php for ($h = 0; $h < 24; $h++): ?>
+                                            <?php
+                                            $time_str = sprintf('%02d:00', $h);
+                                            $display_label = date('g:i A', strtotime("2000-01-01 $time_str"));
+                                            ?>
+                                            <option value="<?= $time_str ?>"><?= $display_label ?> (<?= $time_str ?>)</option>
+                                        <?php endfor; ?>
+                                    </select>
+                                    <div class="form-text text-muted">
+                                        <small>
+                                            <?= lang('day_start_time_hint') ?>
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="day-end-time">
+                                        <?= lang('day_end_time') ?>
+                                    </label>
+                                    <select class="form-select" id="day-end-time" data-field="day_end_time">
+                                        <?php for ($h = 1; $h <= 24; $h++): ?>
+                                            <?php
+                                            $time_str = $h === 24 ? '24:00' : sprintf('%02d:00', $h);
+                                            $display_label = $h === 24 ? '12:00 AM (Midnight)' : date('g:i A', strtotime("2000-01-01 $time_str"));
+                                            ?>
+                                            <option value="<?= $time_str ?>"><?= $display_label ?> (<?= $time_str ?>)</option>
+                                        <?php endfor; ?>
+                                    </select>
+                                    <div class="form-text text-muted">
+                                        <small>
+                                            <?= lang('day_end_time_hint') ?>
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
                                     <label class="form-label" for="default-language">
                                         <?= lang('default_language') ?>
                                         <span class="text-danger" hidden>*</span>
