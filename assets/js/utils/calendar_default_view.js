@@ -1658,26 +1658,22 @@ App.Utils.CalendarDefaultView = (function () {
             eventColor: EVENT_COLORS.default,
             slotLabelFormat: slotTimeFormat,
             allDayContent: lang('all_day'),
+            dayHeaderContent: (arg) => {
+                if (arg.view.type === 'dayGridMonth') {
+                    return arg.text;
+                }
+                return moment(arg.date).format(columnFormat);
+            },
             selectable: true,
             selectMirror: true,
             themeSystem: 'bootstrap5',
             selectLongPressDelay: 100,
             views: {
-                timeGrid: {
-                    dayHeaderFormat: columnFormat,
-                },
                 timeGridWorkWeek: {
                     type: 'timeGrid',
                     duration: { weeks: 1 },
                     hiddenDays: [0, 6],
                     buttonText: lang('work_week') || 'M-F',
-                    dayHeaderFormat: columnFormat,
-                },
-                timeGridWeek: {
-                    dayHeaderFormat: columnFormat,
-                },
-                timeGridDay: {
-                    dayHeaderFormat: columnFormat,
                 },
             },
             headerToolbar: {

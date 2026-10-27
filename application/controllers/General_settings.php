@@ -62,11 +62,28 @@ class General_settings extends EA_Controller
             return str_replace('.min.css', '', basename($available_theme_file));
         }, $available_theme_files);
 
+        $settings = $this->settings_model->get();
+
+        $has_header_show_month = false;
+        foreach ($settings as $setting) {
+            if ($setting['name'] === 'calendar_header_show_month') {
+                $has_header_show_month = true;
+                break;
+            }
+        }
+
+        if (!$has_header_show_month) {
+            $settings[] = [
+                'name' => 'calendar_header_show_month',
+                'value' => '1',
+            ];
+        }
+
         script_vars([
             'user_id' => $user_id,
             'role_slug' => $role_slug,
             'timezones' => $this->timezones->to_array(),
-            'general_settings' => filter_sensitive_settings($this->settings_model->get()),
+            'general_settings' => filter_sensitive_settings($settings),
         ]);
 
         html_vars([
