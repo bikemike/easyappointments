@@ -173,15 +173,24 @@ App.Utils.CalendarTableView = (function () {
      */
     function getFormatSettings() {
         let columnFormat, timeFormat, slotTimeFormat;
-        switch (vars('date_format')) {
-            case 'DMY':
-                columnFormat = 'ddd D/M';
-                break;
-            case 'MDY':
-            case 'YMD':
-            default:
-                columnFormat = 'ddd M/D';
-                break;
+
+        const showMonth = vars('calendar_header_show_month') !== false &&
+                          vars('calendar_header_show_month') !== 0 &&
+                          vars('calendar_header_show_month') !== '0';
+
+        if (showMonth) {
+            switch (vars('date_format')) {
+                case 'DMY':
+                    columnFormat = 'ddd D/M';
+                    break;
+                case 'MDY':
+                case 'YMD':
+                default:
+                    columnFormat = 'ddd M/D';
+                    break;
+            }
+        } else {
+            columnFormat = 'ddd D';
         }
 
         switch (vars('time_format')) {
