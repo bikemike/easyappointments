@@ -1545,9 +1545,11 @@ App.Utils.CalendarDefaultView = (function () {
     function getFormatSettings() {
         let columnFormat, timeFormat, slotTimeFormat;
 
-        const showMonth = vars('calendar_header_show_month') !== false &&
-                          vars('calendar_header_show_month') !== 0 &&
-                          vars('calendar_header_show_month') !== '0';
+        const showMonthSetting = vars('calendar_header_show_month');
+        const showMonth = showMonthSetting === undefined ||
+                          (showMonthSetting !== false &&
+                           showMonthSetting !== 0 &&
+                           showMonthSetting !== '0');
 
         if (showMonth) {
             switch (vars('date_format')) {

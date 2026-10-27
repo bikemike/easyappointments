@@ -7,7 +7,7 @@
                 return vars;
             }
 
-            return vars[key] || undefined;
+            return vars[key] !== undefined ? vars[key] : undefined;
         };
     })();
 </script>
