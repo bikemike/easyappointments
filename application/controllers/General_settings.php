@@ -101,6 +101,7 @@ class General_settings extends EA_Controller
         'day_start_time',
         'day_end_time',
         'calendar_height',
+        'calendar_header_show_month',
         'color_not_working',
         'color_unavailability',
         'color_blocked_period',

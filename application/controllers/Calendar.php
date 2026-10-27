@@ -219,6 +219,7 @@ class Calendar extends EA_Controller
             'day_start_time' => setting('day_start_time') ?: '08:00',
             'day_end_time' => setting('day_end_time') ?: '22:00',
             'calendar_height' => setting('calendar_height') ?: 'auto',
+            'calendar_header_show_month' => (int) (setting('calendar_header_show_month') ?? 1),
             'color_not_working' => setting('color_not_working') ?: '#BEBEBE',
             'color_unavailability' => setting('color_unavailability') ?: '#879DB4',
             'color_blocked_period' => setting('color_blocked_period') ?: '#d65069',

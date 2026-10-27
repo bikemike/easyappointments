@@ -248,6 +248,19 @@
                                     </div>
                                 </div>
 
+                                <div class="form-check form-switch mb-1">
+                                    <input class="form-check-input" type="checkbox" id="calendar-header-show-month"
+                                           data-field="calendar_header_show_month">
+                                    <label class="form-check-label" for="calendar-header-show-month">
+                                        <?= lang('calendar_header_show_month') ?>
+                                    </label>
+                                </div>
+                                <div class="form-text text-muted mb-3">
+                                    <small>
+                                        <?= lang('calendar_header_show_month_hint') ?>
+                                    </small>
+                                </div>
+
                                 <div class="mb-3">
                                     <label class="form-label" for="default-language">
                                         <?= lang('default_language') ?>
