@@ -1693,7 +1693,12 @@ App.Utils.CalendarTableView = (function () {
             eventColor: EVENT_COLORS.default,
             slotLabelFormat: slotTimeFormat,
             allDayContent: lang('all_day'),
-            dayHeaderFormat: columnFormat,
+            dayHeaderContent: (arg) => {
+                if (arg.view.type === 'dayGridMonth') {
+                    return arg.text;
+                }
+                return moment(arg.date).format(columnFormat);
+            },
             selectable: true,
             selectHelper: true,
             themeSystem: 'bootstrap5',
