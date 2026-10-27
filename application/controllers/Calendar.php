@@ -223,6 +223,7 @@ class Calendar extends EA_Controller
             'color_not_working' => setting('color_not_working') ?: '#BEBEBE',
             'color_unavailability' => setting('color_unavailability') ?: '#879DB4',
             'color_blocked_period' => setting('color_blocked_period') ?: '#d65069',
+            'color_one_off_availability' => setting('color_one_off_availability') ?: '#28A745',
             'company_working_plan' => setting('company_working_plan'),
             'timezones' => $this->timezones->to_array(),
             'privileges' => $privileges,
