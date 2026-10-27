@@ -350,6 +350,17 @@
                                         <small><?= lang('color_blocked_period_hint') ?></small>
                                     </div>
                                 </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="color-one-off-availability">
+                                        <?= lang('color_one_off_availability') ?>
+                                    </label>
+                                    <input type="color" id="color-one-off-availability" data-field="color_one_off_availability"
+                                           class="form-control form-control-color" value="#28a745">
+                                    <div class="form-text text-muted">
+                                        <small><?= lang('color_one_off_availability_hint') ?></small>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
