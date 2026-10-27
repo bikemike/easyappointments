@@ -238,6 +238,15 @@ body .modal.full-screen .modal-push {
     border: 1px solid var(--bs-border-color);
 }
 
+#calendar-page #calendar .fc-one-off-availability,
+#calendar .fc-one-off-availability {
+    background-image: none !important;
+    font-size: 14px;
+    border-radius: 0;
+    font-weight: bold;
+    color: #fff;
+}
+
 #calendar-page #calendar .fc-unavailability.fc-blocked-period {
     background-image: none;
     text-shadow: none;

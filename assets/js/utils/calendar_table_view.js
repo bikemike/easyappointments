@@ -19,7 +19,7 @@ App.Utils.CalendarTableView = (function () {
 
     const EVENT_COLORS = {
         unavailability: (typeof vars === 'function' && vars('color_unavailability')) || '#879DB4',
-        oneOffAvailability: '#28a745',
+        oneOffAvailability: (typeof vars === 'function' && vars('color_one_off_availability')) || '#28A745',
         blockedPeriod: (typeof vars === 'function' && vars('color_blocked_period')) || '#d65069',
         notWorking: (typeof vars === 'function' && vars('color_not_working')) || '#BEBEBE',
         workingPlanException: (typeof vars === 'function' && vars('color_unavailability')) || '#879DB4',
@@ -536,7 +536,7 @@ App.Utils.CalendarTableView = (function () {
             displayDelete = $target.hasClass('fc-custom') && vars('privileges').appointments.delete ? 'me-2' : 'd-none';
             $html = App.Utils.CalendarEventPopover.buildWorkingPlanExceptionPopover(info, displayEdit, displayDelete);
         } else if ($target.hasClass('fc-one-off-availability')) {
-            const isCustom = $target.hasClass('fc-custom');
+            const isCustom = $target.hasClass('fc-custom') || $target.hasClass('fc-one-off-availability');
 
             displayEdit = isCustom && vars('privileges').appointments.edit ? '' : 'd-none';
             displayDelete = isCustom && vars('privileges').appointments.delete ? 'me-2' : 'd-none';
@@ -1145,9 +1145,11 @@ App.Utils.CalendarTableView = (function () {
                     end: moment(oneOff.end_datetime).toDate(),
                     allDay: false,
                     color: EVENT_COLORS.oneOffAvailability,
+                    backgroundColor: EVENT_COLORS.oneOffAvailability,
+                    borderColor: EVENT_COLORS.oneOffAvailability,
                     display: 'block',
                     editable: true,
-                    className: 'fc-one-off-availability fc-custom',
+                    className: 'fc-one-off-availability',
                     data: oneOff,
                 };
             });

@@ -79,6 +79,21 @@ class General_settings extends EA_Controller
             ];
         }
 
+        $has_one_off_color = false;
+        foreach ($settings as $setting) {
+            if ($setting['name'] === 'color_one_off_availability') {
+                $has_one_off_color = true;
+                break;
+            }
+        }
+
+        if (!$has_one_off_color) {
+            $settings[] = [
+                'name' => 'color_one_off_availability',
+                'value' => '#28A745',
+            ];
+        }
+
         script_vars([
             'user_id' => $user_id,
             'role_slug' => $role_slug,
@@ -122,6 +137,7 @@ class General_settings extends EA_Controller
         'color_not_working',
         'color_unavailability',
         'color_blocked_period',
+        'color_one_off_availability',
         'require_phone_number',
         'display_cookie_notice',
         'cookie_notice_content',
