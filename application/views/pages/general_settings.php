@@ -250,7 +250,7 @@
 
                                 <div class="form-check form-switch mb-1">
                                     <input class="form-check-input" type="checkbox" id="calendar-header-show-month"
-                                           data-field="calendar_header_show_month">
+                                           data-field="calendar_header_show_month" checked>
                                     <label class="form-check-label" for="calendar-header-show-month">
                                         <?= lang('calendar_header_show_month') ?>
                                     </label>
