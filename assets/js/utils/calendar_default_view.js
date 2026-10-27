@@ -1545,15 +1545,23 @@ App.Utils.CalendarDefaultView = (function () {
     function getFormatSettings() {
         let columnFormat, timeFormat, slotTimeFormat;
 
-        switch (vars('date_format')) {
-            case 'DMY':
-                columnFormat = 'ddd D/M';
-                break;
-            case 'MDY':
-            case 'YMD':
-            default:
-                columnFormat = 'ddd M/D';
-                break;
+        const showMonth = vars('calendar_header_show_month') !== false &&
+                          vars('calendar_header_show_month') !== 0 &&
+                          vars('calendar_header_show_month') !== '0';
+
+        if (showMonth) {
+            switch (vars('date_format')) {
+                case 'DMY':
+                    columnFormat = 'ddd D/M';
+                    break;
+                case 'MDY':
+                case 'YMD':
+                default:
+                    columnFormat = 'ddd M/D';
+                    break;
+            }
+        } else {
+            columnFormat = 'ddd D';
         }
         switch (vars('time_format')) {
             case 'military':
@@ -1655,11 +1663,21 @@ App.Utils.CalendarDefaultView = (function () {
             themeSystem: 'bootstrap5',
             selectLongPressDelay: 100,
             views: {
+                timeGrid: {
+                    dayHeaderFormat: columnFormat,
+                },
                 timeGridWorkWeek: {
                     type: 'timeGrid',
                     duration: { weeks: 1 },
                     hiddenDays: [0, 6],
                     buttonText: lang('work_week') || 'M-F',
+                    dayHeaderFormat: columnFormat,
+                },
+                timeGridWeek: {
+                    dayHeaderFormat: columnFormat,
+                },
+                timeGridDay: {
+                    dayHeaderFormat: columnFormat,
                 },
             },
             headerToolbar: {
