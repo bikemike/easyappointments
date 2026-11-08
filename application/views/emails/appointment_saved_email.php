@@ -418,8 +418,7 @@ $customer_address = trim((string) ($customer['address'] ?? ''));
 
                                         <div style="background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 4px; padding: 12px; margin: 16px 0; font-size: 13px; line-height: 1.5;">
                                             <p style="margin: 0 0 8px 0;"><strong>Clinic Location:</strong><br/>
-                                            46 Degoutiere Place, Victoria BC<br/>
-                                            Please park in the driveway or on the road.</p>
+                                            46 Degoutiere Place, Victoria BC</p>
                                             <p style="margin: 0 0 8px 0;">Alix Morrison, RMT: (250) 857-8969 (call or text)</p>
                                             <p style="margin: 0; color: #6c757d;"><strong>Cancellation Policy:</strong> We require at least 24 hours notice for cancellations. Should an appointment be missed without notice, the full appointment fee will apply.</p>
                                         </div>
